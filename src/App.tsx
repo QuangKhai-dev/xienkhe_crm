@@ -2,199 +2,217 @@ import React, { PropsWithChildren, useEffect } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import Login from './pages/Login/Login';
 import axios from 'axios';
-import AdminTemplate from './templates/AdminTemplate';
+import AdminTemplate from './templates/AdminTemplate/AdminTemplate';
 import themeConfig from './theme.config';
 import store from './store';
 
 function App({ children }: PropsWithChildren) {
-  // const arr = [
-  //   {
-  //     name: 'Nguyễn Văn A',
-  //     email: 'nguyenvana@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Trần Thị B',
-  //     email: 'tranthib@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Lê Văn C',
-  //     email: 'levanc@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Phạm Thị D',
-  //     email: 'phamthid@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Hoàng Văn E',
-  //     email: 'hoangvane@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Nguyễn Thị F',
-  //     email: 'nguyenthif@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Trần Văn G',
-  //     email: 'tranvang@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Lê Thị H',
-  //     email: 'lethih@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Phạm Văn I',
-  //     email: 'phamvani@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Hoàng Thị K',
-  //     email: 'hoangthik@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Nguyễn Văn L',
-  //     email: 'nguyenvanl@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Trần Thị M',
-  //     email: 'tranthim@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Lê Văn N',
-  //     email: 'levann@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Phạm Thị O',
-  //     email: 'phamthio@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Hoàng Văn P',
-  //     email: 'hoangvanp@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Nguyễn Thị Q',
-  //     email: 'nguyenthiq@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Trần Văn R',
-  //     email: 'tranvar@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Lê Thị S',
-  //     email: 'lethis@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Phạm Văn T',
-  //     email: 'phamvant@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Hoàng Thị U',
-  //     email: 'hoangthiu@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Nguyễn Văn V',
-  //     email: 'nguyenvanv@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Trần Thị X',
-  //     email: 'tranthix@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Lê Văn Y',
-  //     email: 'levany@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Phạm Thị Z',
-  //     email: 'phamthiz@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Hoàng Văn Khoai',
-  //     email: 'hoangvankhoai@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Nguyễn Thị Lan',
-  //     email: 'nguyenthilan@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Trần Văn Đạo',
-  //     email: 'tranvandao@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Lê Thị Mai',
-  //     email: 'lethimai@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Phạm Văn Tuấn',
-  //     email: 'phamvantuan@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Hoàng Thị Ngọc',
-  //     email: 'hoangthingoc@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  //   {
-  //     name: 'Nguyễn Văn Hiếu',
-  //     email: 'nguyenvanhieu@gmail.com',
-  //     password: 'string',
-  //     phoneNumber: 'string',
-  //   },
-  // ];
+  const arrUser = [
+    {
+      name: 'Nguyễn Văn A',
+      email: 'nguyenvana@gmail.com',
+      phoneNumber: '0850327441',
+      role: 'user',
+      isActive: 1,
+    },
+    {
+      name: 'Trần Thị B',
+      email: 'tranthib@gmail.com',
+      phoneNumber: '0934740991',
+      role: 'user',
+      isActive: 1,
+    },
+    {
+      name: 'Lê Minh C',
+      email: 'leminhc@gmail.com',
+      phoneNumber: '0971865635',
+      role: 'user',
+      isActive: 1,
+    },
+    {
+      name: 'Phạm Thị D',
+      email: 'phamthid@gmail.com',
+      phoneNumber: '0974517023',
+      role: 'user',
+      isActive: 1,
+    },
+    {
+      name: 'Hoàng Văn E',
+      email: 'hoangvane@gmail.com',
+      phoneNumber: '0983181467',
+      role: 'user',
+      isActive: 1,
+    },
+    {
+      name: 'Nguyễn Văn F',
+      email: 'nguyenvanf@gmail.com',
+      phoneNumber: '0934019278',
+      role: 'user',
+      isActive: 1,
+    },
+    {
+      name: 'Trần Thị G',
+      email: 'tranthig@gmail.com',
+      phoneNumber: '0974836291',
+      role: 'user',
+      isActive: 1,
+    },
+    {
+      name: 'Lê Minh H',
+      email: 'leminhh@gmail.com',
+      phoneNumber: '0934718265',
+      role: 'user',
+      isActive: 1,
+    },
+    {
+      name: 'Phạm Thị I',
+      email: 'phamthii@gmail.com',
+      phoneNumber: '0938165247',
+      role: 'user',
+      isActive: 1,
+    },
+    {
+      name: 'Hoàng Văn J',
+      email: 'hoangvanj@gmail.com',
+      phoneNumber: '0878902341',
+      role: 'user',
+      isActive: 1,
+    },
+    {
+      name: 'Nguyễn Văn K',
+      email: 'nguyenvank@gmail.com',
+      phoneNumber: '0934718234',
+      role: 'user',
+      isActive: 1,
+    },
+    {
+      name: 'Trần Thị L',
+      email: 'tranthil@gmail.com',
+      phoneNumber: '0938165372',
+      role: 'user',
+      isActive: 1,
+    },
+    {
+      name: 'Lê Minh M',
+      email: 'leminhm@gmail.com',
+      phoneNumber: '0834871029',
+      role: 'user',
+      isActive: 1,
+    },
+    {
+      name: 'Phạm Thị N',
+      email: 'phamthin@gmail.com',
+      phoneNumber: '0878902146',
+      role: 'user',
+      isActive: 1,
+    },
+    {
+      name: 'Hoàng Văn O',
+      email: 'hoangvano@gmail.com',
+      phoneNumber: '0878923471',
+      role: 'user',
+      isActive: 1,
+    },
+    {
+      name: 'Nguyễn Văn P',
+      email: 'nguyenvanp@gmail.com',
+      phoneNumber: '0974836240',
+      role: 'user',
+      isActive: 1,
+    },
+    {
+      name: 'Trần Thị Q',
+      email: 'tranthiq@gmail.com',
+      phoneNumber: '0834892761',
+      role: 'user',
+      isActive: 1,
+    },
+    {
+      name: 'Lê Minh R',
+      email: 'leminhr@gmail.com',
+      phoneNumber: '0934718260',
+      role: 'user',
+      isActive: 1,
+    },
+    {
+      name: 'Phạm Thị S',
+      email: 'phamthis@gmail.com',
+      phoneNumber: '0834162987',
+      role: 'user',
+      isActive: 1,
+    },
+    {
+      name: 'Hoàng Văn T',
+      email: 'hoangvant@gmail.com',
+      phoneNumber: '0878923416',
+      role: 'user',
+      isActive: 1,
+    },
+    {
+      name: 'Nguyễn Văn U',
+      email: 'nguyenvanu@gmail.com',
+      phoneNumber: '0938147290',
+      role: 'user',
+      isActive: 1,
+    },
+    {
+      name: 'Trần Thị V',
+      email: 'tranthiv@gmail.com',
+      phoneNumber: '0934182765',
+      role: 'user',
+      isActive: 1,
+    },
+    {
+      name: 'Lê Minh X',
+      email: 'leminhx@gmail.com',
+      phoneNumber: '0934178294',
+      role: 'user',
+      isActive: 1,
+    },
+    {
+      name: 'Phạm Thị Y',
+      email: 'phamthiy@gmail.com',
+      phoneNumber: '0834162975',
+      role: 'user',
+      isActive: 1,
+    },
+    {
+      name: 'Hoàng Văn Z',
+      email: 'hoangvanz@gmail.com',
+      phoneNumber: '0934125967',
+      role: 'user',
+      isActive: 1,
+    },
+    {
+      name: 'Nguyễn Văn W',
+      email: 'nguyenvanw@gmail.com',
+      phoneNumber: '0938986421',
+      role: 'user',
+      isActive: 1,
+    },
+    {
+      name: 'Trần Thị U',
+      email: 'tranthiu@gmail.com',
+      phoneNumber: '0834769812',
+      role: 'user',
+      isActive: 1,
+    },
+    {
+      name: 'Lê Minh X',
+      email: 'leminhx@gmail.com',
+      phoneNumber: '0934718269',
+      role: 'user',
+      isActive: 1,
+    },
+    {
+      name: 'Phạm Thị W',
+      email: 'phamthiw@gmail.com',
+      phoneNumber: '0934178294',
+      role: 'user',
+      isActive: 1,
+    },
+  ];
+
   const arrBranch = [
     {
       name: 'Xiên khè Q1',
@@ -239,15 +257,15 @@ function App({ children }: PropsWithChildren) {
       decs: 'lorem',
     },
   ];
-  useEffect(() => {
-    for (let i = 0; i < arrBranch.length; i++) {
-      // axios({
-      //   method: 'POST',
-      //   url: 'http://localhost:3000/branch',
-      //   data: arrBranch[i],
-      // });
-    }
-  }, []);
+  // useEffect(() => {
+  //   for (let i = 0; i < arrUser.length; i++) {
+  //     axios({
+  //       method: 'POST',
+  //       url: 'http://localhost:3000/auth/register',
+  //       data: arrUser[i],
+  //     });
+  //   }
+  // }, []);
 
   return (
     <div
