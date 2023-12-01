@@ -1,91 +1,164 @@
-import React, { Fragment, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { branchServ } from '../../services/branchServ';
+import { useState, Fragment, useEffect } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
 import { useDispatch } from 'react-redux';
 import { setPageTitle } from '../../store/themeConfigSlice';
-import IconSearch from '../../components/Icon/IconSearch';
-import { useFormik } from 'formik';
-import IconMenuCalendar from '../../components/Icon/Menu/IconMenuCalendar';
-import { Dialog, Transition } from '@headlessui/react';
-import IconX from '../../components/Icon/IconX';
 import * as Yup from 'yup';
 import ImageUploading, { ImageListType } from 'react-images-uploading';
-import { foodServ } from '../../services/foodServ';
-import { managerOrderServ } from '../../services/managerOrderServ';
-import moment from 'moment';
+import IconSearch from '../../components/Icon/IconSearch';
+import { useFormik } from 'formik';
+import IconX from '../../components/Icon/IconX';
+import { userServ } from '../../services/userServ';
+import { Link } from 'react-router-dom';
+import IconMenuCalendar from '../../components/Icon/Menu/IconMenuCalendar';
 import Select from 'react-select';
-type Props = {};
+import Swal from 'sweetalert2';
+const optionsRole = [
+  { value: '', label: 'Chọn chức vụ' },
+  { value: 'user', label: 'User' },
+  { value: 'admin', label: 'Admin' },
+];
 
-const ManagerOrder = (props: Props) => {
+interface FormType {
+  id: number | null;
+  name: string;
+  email: string;
+  password: string;
+  phoneNumber: string;
+  role: string;
+}
+
+const ManageUser = () => {
   const dispatch = useDispatch();
   const maxNumber = 69;
   const [addContactModal, setAddContactModal] = useState<any>(false);
   const [images, setImages] = useState<any>([]);
   const [search, setSearch] = useState<any>('');
   const [filteredItems, setFilteredItems] = useState<any>([]);
-  const optionBranch: Array<{ value: number; label: string }> = [];
-  const { values, handleSubmit, handleBlur, handleChange, errors, touched } =
-    useFormik({
-      initialValues: {
-        name: '',
-        giaTien: '',
-        moTa: '',
-      },
-      onSubmit: async (values) => {
-        // const formData = new FormData();
-        // for (let key in values) {
-        //   let value = values[key as keyof FormType];
-        //   formData.append(key, value);
-        // }
-        // // tạo form data gửi hình
-        // // error when set form data is empty
-        // formData.append('img', images[0].file);
-        // foodServ.addFoodServ(formData).then((res) => {
-        //   foodServ.getAllFood();
-        // });
-        // await branchServ.uploadImageBranch(formData, res.data.response.id);
-        // await branchServ.getAllBranch();
-      },
-      validationSchema: Yup.object().shape({
-        name: Yup.string().required('Vui lòng không bỏ trống'),
-        giaTien: Yup.string().required('Vui lòng không bỏ trống'),
-        moTa: Yup.string().required('Vui lòng không bỏ trống'),
-      }),
-    });
+  const {
+    values,
+    handleSubmit,
+    handleBlur,
+    handleChange,
+    errors,
+    touched,
+    setFieldValue,
+    resetForm,
+    setValues,
+  } = useFormik({
+    initialValues: {
+      id: null,
+      name: '',
+      email: '',
+      password: '',
+      phoneNumber: '',
+      role: '',
+    },
+    onSubmit: async (values, { resetForm }) => {
+      try {
+        const formData = new FormData();
+        for (let key in values) {
+          if (key !== 'id') {
+            formData.append(key, values[key as keyof Omit<FormType, 'id'>]);
+          }
+        }
+        if (!images[0].dataURL.includes('cloudinary')) {
+          formData.append('img', images[0].file);
+        }
+        if (values.id) {
+          await userServ.updateUserServ(formData, values.id as number);
+
+          Swal.fire({
+            icon: 'success',
+            title: 'Cập nhật người dùng thành công',
+            padding: '2em',
+            customClass: 'sweet-alerts',
+          });
+        } else {
+          await userServ.addUserServ(values);
+
+          Swal.fire({
+            icon: 'success',
+            title: 'Thêm người dùng thành công',
+            padding: '2em',
+            customClass: 'sweet-alerts',
+          });
+        }
+
+        setAddContactModal(false);
+        resetForm();
+      } catch (error) {
+        console.log(error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Có lỗi xảy ra vui lòng thử lại',
+          padding: '2em',
+          customClass: 'sweet-alerts',
+        });
+      }
+    },
+    validationSchema: Yup.object().shape({
+      name: Yup.string().required('Vui lòng không bỏ trống'),
+      email: Yup.string().required('Vui lòng không bỏ trống'),
+      password: Yup.string().required('Vui lòng không bỏ trống'),
+      phoneNumber: Yup.string().required('Vui lòng không bỏ trống'),
+      role: Yup.string().required('Vui lòng không bỏ trống'),
+    }),
+  });
   useEffect(() => {
-    dispatch(setPageTitle('Manage Order'));
-    managerOrderServ
-      .getAllManagerOrder()
+    dispatch(setPageTitle('Manage User'));
+    getAllUser();
+  }, []);
+
+  const getAllUser = () => {
+    userServ
+      .getAllUser()
       .then((res) => {
-        setFilteredItems(res.data.response);
+        setFilteredItems(
+          res.data.response.filter((item: any) => item.isActive)
+        );
+      })
+      .catch((err) => {});
+  };
+
+  const deleteUser = (id: number) => {
+    userServ
+      .deleteUserServ(id)
+      .then((res) => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Xoá người dùng thành công',
+          padding: '2em',
+          customClass: 'sweet-alerts',
+        });
+        getAllUser();
       })
       .catch((err) => {
         console.log(err);
       });
-    getAllBranch();
-  }, []);
-
-  const getAllBranch = () => {
-    branchServ.getAllBranch().then((res) => {
-      res.data.response.map((branch: any) => {
-        optionBranch.push({
-          value: branch.id,
-          label: branch.name,
-        });
-      });
-    });
   };
 
-  const deleteFood = (id: number) => {
-    foodServ.deleteFoodServ(id).then((res) => {
-      console.log(res);
-      foodServ.getAllFood().then((res) => {
-        setFilteredItems(res.data.response);
+  const editUser = (user: any = null) => {
+    if (user) {
+      setValues({
+        name: user.name,
+        email: user.email,
+        password: user.password,
+        phoneNumber: user.phoneNumber,
+        role: user.role,
+        id: user.id,
       });
-    });
-  };
-
-  const editOrder = (user: any = null) => {
+      // change img to data url
+      const img = new Image();
+      img.src = user.img;
+      setImages([
+        {
+          dataURL: img.src,
+          file: new File([img.src], 'image.png', { type: 'image/png' }),
+        },
+      ]);
+    } else {
+      resetForm();
+    }
     setAddContactModal(true);
   };
   const onChangeImage = (
@@ -104,21 +177,21 @@ const ManagerOrder = (props: Props) => {
           </Link>
         </li>
         <li className="before:content-['/'] ltr:before:mr-2 rtl:before:ml-2">
-          <span>Danh sách nhà hàng</span>
+          <span>Danh sách người dùng</span>
         </li>
       </ul>
       <div className="flex items-center justify-between flex-wrap gap-4">
-        <h2 className="text-xl">Danh sách chi nhánh</h2>
+        <h2 className="text-xl">Danh sách người dùng</h2>
         <div className="flex sm:flex-row flex-col sm:items-center sm:gap-3 gap-4 w-full sm:w-auto">
           <div className="flex gap-3">
             <div>
               <button
                 type="button"
                 className="btn btn-primary"
-                onClick={() => editOrder()}
+                onClick={() => editUser()}
               >
                 <IconMenuCalendar className="ltr:mr-2 rtl:ml-2" />
-                Thêm lịch đặt bàn
+                Thêm người dùng
               </button>
             </div>
           </div>
@@ -145,62 +218,51 @@ const ManagerOrder = (props: Props) => {
             <thead>
               <tr>
                 <th>Id</th>
-                <th>Chi nhánh</th>
-                <th>Tên khách</th>
+                <th>Họ tên</th>
+                <th>Avatar</th>
+                <th>Email</th>
                 <th>Số điện thoại</th>
-                <th>Giờ dự kiến</th>
-                <th>Số lượng</th>
-                <th>Trạng thái</th>
-                <th>Yêu cầu</th>
-                <th className="!text-center">Actions</th>
+                <th>Chức vụ</th>
+                <th className="!text-center">Hành động</th>
               </tr>
             </thead>
             <tbody>
-              {filteredItems.map((order: any) => {
-                console.log(order);
+              {filteredItems.map((user: any) => {
                 return (
-                  <tr key={order.id}>
+                  <tr key={user.id}>
                     <td>
                       <div className="flex items-center w-max">
-                        <div>{order.id}</div>
+                        <div>{user.id}</div>
                       </div>
                     </td>
-                    <td>{order.branch.name}</td>
-                    <td className="whitespace-nowrap">{order.user.name}</td>
+                    <td>{user.name}</td>
                     <td className="whitespace-nowrap">
-                      {order.user.phoneNumber}
+                      <img src={user.img} width={50} alt="" />
                     </td>
+                    <td className="whitespace-nowrap">{user.email}</td>
+                    <td className="whitespace-nowrap">{user.phoneNumber}</td>
                     <td className="whitespace-nowrap">
-                      <span className="badge badge-outline-danger">
-                        {moment(order.setDate).format('DD/MM')} -
-                        {moment(order.setDate).format('HH:mm')}
-                        {/* {moment().format()} : {moment().format()} */}
+                      <span className="badge badge-outline-secondary uppercase">
+                        {user.role}
                       </span>
                     </td>
-                    <td className="whitespace-nowrap">{order.amount}</td>
-                    <td className="whitespace-nowrap">
-                      <span className="badge badge-outline-primary">
-                        {order.tracking.status}
-                      </span>
-                    </td>
-                    <td className="whitespace-nowrap">{order.requestUser}</td>
 
                     <td>
                       <div className="flex gap-4 items-center justify-center">
                         <button
                           type="button"
                           className="btn btn-sm btn-outline-primary"
-                          onClick={() => editOrder()}
+                          onClick={() => editUser(user)}
                         >
                           Edit
                         </button>
-                        {/* <button
+                        <button
                           type="button"
                           className="btn btn-sm btn-outline-danger"
-                          // onClick={() => deleteUser(user.id)}
+                          onClick={() => deleteUser(user.id)}
                         >
                           Delete
-                        </button> */}
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -242,7 +304,10 @@ const ManagerOrder = (props: Props) => {
                 <Dialog.Panel className="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg text-black dark:text-white-dark">
                   <button
                     type="button"
-                    onClick={() => setAddContactModal(false)}
+                    onClick={() => {
+                      setAddContactModal(false);
+                      resetForm();
+                    }}
                     className="absolute top-4 ltr:right-4 rtl:left-4 text-gray-400 hover:text-gray-800 dark:hover:text-gray-600 outline-none"
                   >
                     <IconX />
@@ -253,11 +318,11 @@ const ManagerOrder = (props: Props) => {
                   <div className="p-5">
                     <form onSubmit={handleSubmit}>
                       <div className="mb-5">
-                        <label htmlFor="name">Tên khách hàng</label>
+                        <label htmlFor="name">Họ tên</label>
                         <input
                           id="name"
                           type="text"
-                          placeholder="Nhập tên khách hàng"
+                          placeholder="Nhập họ tên"
                           name="name"
                           className={`form-input ${
                             errors.name && touched.name ? 'has-error' : ''
@@ -273,43 +338,78 @@ const ManagerOrder = (props: Props) => {
                         ) : null}
                       </div>
                       <div className="mb-5">
+                        <label htmlFor="phoneNumber">PhoneNumber</label>
+                        <input
+                          id="phoneNumber"
+                          type="text"
+                          placeholder="Vui lòng nhập số điện thoại"
+                          name="phoneNumber"
+                          className="form-input"
+                          value={values.phoneNumber}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                        />
+                        {errors.phoneNumber && touched.phoneNumber ? (
+                          <div className="text-danger text-xs mt-1">
+                            {errors.phoneNumber}
+                          </div>
+                        ) : null}
+                      </div>
+                      <div className="mb-5">
+                        <label htmlFor="email">Email</label>
+                        <input
+                          id="email"
+                          type="text"
+                          placeholder="Vui lòng nhập địa chỉ"
+                          className="form-input"
+                          name="email"
+                          value={values.email}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                        />
+                        {errors.email && touched.email ? (
+                          <div className="text-danger text-xs mt-1">
+                            {errors.email}
+                          </div>
+                        ) : null}
+                      </div>
+                      <div className="mb-5">
                         <label htmlFor="role">Chức vụ</label>
                         <Select
                           name="role"
                           id="role"
-                          defaultValue={optionBranch[0]}
-                          options={optionBranch}
-                          // value={optionBranch.find((item) => {
-                          //   return values.role == item.value;
-                          // })}
+                          defaultValue={optionsRole[0]}
+                          options={optionsRole}
+                          value={optionsRole.find((item) => {
+                            return values.role == item.value;
+                          })}
                           isSearchable={false}
                           onBlur={handleBlur}
-                          // onChange={(type) => {
-                          //   setFieldValue('role', type?.value);
-                          // }}
+                          onChange={(type) => {
+                            setFieldValue('role', type?.value);
+                          }}
                         />
-                        {/* {errors.role && touched.role ? (
+                        {errors.role && touched.role ? (
                           <div className="text-danger text-xs mt-1">
                             {errors.role}
                           </div>
-                        ) : null} */}
+                        ) : null}
                       </div>
-
                       <div className="mb-5">
-                        <label htmlFor="moTa">Mô tả</label>
+                        <label htmlFor="password">Mật khẩu</label>
                         <input
-                          id="moTa"
+                          id="password"
                           type="text"
-                          name="moTa"
+                          name="password"
                           placeholder="Vui lòng nhập mô tả"
                           className="form-input"
-                          value={values.moTa}
+                          value={values.password}
                           onChange={handleChange}
                           onBlur={handleBlur}
                         />
-                        {errors.moTa && touched.moTa ? (
+                        {errors.password && touched.password ? (
                           <div className="text-danger text-xs mt-1">
-                            {errors.moTa}
+                            {errors.password}
                           </div>
                         ) : null}
                       </div>
@@ -357,6 +457,7 @@ const ManagerOrder = (props: Props) => {
                             }) => (
                               <div className="upload__image-wrapper">
                                 <button
+                                  type="button"
                                   className="custom-file-container__custom-file__custom-file-control"
                                   onClick={onImageUpload}
                                 >
@@ -385,14 +486,17 @@ const ManagerOrder = (props: Props) => {
                         <button
                           type="button"
                           className="btn btn-outline-danger"
-                          onClick={() => setAddContactModal(false)}
+                          onClick={() => {
+                            setAddContactModal(false);
+                            resetForm();
+                          }}
                         >
                           Cancel
                         </button>
                         <button
                           type="submit"
                           className="btn btn-primary ltr:ml-4 rtl:mr-4"
-                          // onClick={editOrder}
+                          // onClick={saveUser}
                         >
                           Add
                         </button>
@@ -409,4 +513,4 @@ const ManagerOrder = (props: Props) => {
   );
 };
 
-export default ManagerOrder;
+export default ManageUser;

@@ -3,7 +3,7 @@ import DashBoard from '../pages/DashBoard/DashBoard';
 import ManagerFood from '../pages/Food/ManagerFood';
 import LoginPage from '../pages/Login/Login';
 import ManagerOrder from '../pages/OrderHistory/ManagerOrder';
-import Contacts from '../pages/User/Contacts';
+import ManageUser from '../pages/User/ManageUser';
 
 const routes = [
   // dashboard
@@ -17,10 +17,14 @@ const routes = [
   },
   {
     path: '/manage-user',
-    element: <Contacts />,
+    element: <ManageUser />,
   },
   {
     path: '/manage-branch',
+    element: <ManagerBranch />,
+  },
+  {
+    path: '/manage-food-branch',
     element: <ManagerBranch />,
   },
   {
@@ -29,6 +33,10 @@ const routes = [
   },
   {
     path: '/manage-order',
+    element: <ManagerOrder />,
+  },
+  {
+    path: '/manage-order-user',
     element: <ManagerOrder />,
   },
 ];

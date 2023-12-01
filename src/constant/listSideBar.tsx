@@ -11,6 +11,11 @@ export const listSideBar = [
         path: '/manage-user',
         icon: <IconUser className="group-hover:!text-primary shrink-0" />,
       },
+      {
+        name: 'Lịch sử đặt bàn',
+        path: '/manage-order-user',
+        icon: <IconUser className="group-hover:!text-primary shrink-0" />,
+      },
     ],
   },
   {
@@ -20,6 +25,11 @@ export const listSideBar = [
       {
         name: 'Quản lí chi nhánh',
         path: '/manage-branch',
+        icon: <IconUser className="group-hover:!text-primary shrink-0" />,
+      },
+      {
+        name: 'Quản lí món ăn chi nhánh',
+        path: '/manage-food-branch',
         icon: <IconUser className="group-hover:!text-primary shrink-0" />,
       },
     ],

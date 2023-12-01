@@ -10,6 +10,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import IconX from '../../components/Icon/IconX';
 import * as Yup from 'yup';
 import ImageUploading, { ImageListType } from 'react-images-uploading';
+import Swal from 'sweetalert2';
 
 type Props = {};
 
@@ -20,53 +21,147 @@ const ManagerBranch = (props: Props) => {
   const [images, setImages] = useState<any>([]);
   const [search, setSearch] = useState<any>('');
   const [filteredItems, setFilteredItems] = useState<any>([]);
-  const { values, handleSubmit, handleBlur, handleChange, errors, touched } =
-    useFormik({
-      initialValues: {
-        name: '',
-        decs: '',
-        phoneNumber: '',
-        address: '',
-      },
-      onSubmit: async (values) => {
-        const res = await branchServ.addBranchServ(values);
-        console.log(res);
-        // tạo form data gửi hình
-        const formData = new FormData();
-        console.log(images[0].file);
-        // error when set form data is empty
-        formData.append('file', images[0].file);
-        await branchServ.uploadImageBranch(formData, res.data.response.id);
-        await branchServ.getAllBranch();
-      },
-      validationSchema: Yup.object().shape({
-        name: Yup.string().required('Vui lòng không bỏ trống'),
-        phoneNumber: Yup.string().required('Vui lòng không bỏ trống'),
-        address: Yup.string().required('Vui lòng không bỏ trống'),
-        decs: Yup.string().required('Vui lòng không bỏ trống'),
-      }),
-    });
+  const {
+    values,
+    handleSubmit,
+    handleBlur,
+    handleChange,
+    errors,
+    touched,
+    setValues,
+    resetForm,
+  } = useFormik({
+    initialValues: {
+      id: null,
+      name: '',
+      decs: '',
+      phoneNumber: '',
+      address: '',
+    },
+    onSubmit: async (values, { resetForm }) => {
+      try {
+        if (values.id) {
+          await branchServ.updateBranchServ(values, values.id);
+          // tạo form data gửi hình
+          if (images.length !== 0) {
+            const formData = new FormData();
+            console.log(images[0].file);
+            // error when set form data is empty
+            formData.append('file', images[0].file);
+            await branchServ.uploadImageBranch(formData, values.id);
+          }
+        } else {
+          const res = await branchServ.addBranchServ(values);
+          // tạo form data gửi hình
+          if (images.length !== 0) {
+            const formData = new FormData();
+            console.log(images[0].file);
+            // error when set form data is empty
+            formData.append('file', images[0].file);
+            await branchServ.uploadImageBranch(formData, res.data.response.id);
+          }
+        }
+        await getAllBranch();
+        Swal.fire({
+          icon: 'success',
+          title: values.id
+            ? 'Cập nhật nhà hàng thành công'
+            : 'Thêm nhà hàng thành công',
+          padding: '2em',
+          customClass: 'sweet-alerts',
+        });
+        setAddContactModal(false);
+        resetForm();
+        setImages([]);
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Có lỗi xảy ra',
+          padding: '2em',
+          customClass: 'sweet-alerts',
+        });
+      }
+    },
+    validationSchema: Yup.object().shape({
+      name: Yup.string().required('Vui lòng không bỏ trống'),
+      phoneNumber: Yup.string().required('Vui lòng không bỏ trống'),
+      address: Yup.string().required('Vui lòng không bỏ trống'),
+      decs: Yup.string().required('Vui lòng không bỏ trống'),
+    }),
+  });
   useEffect(() => {
     dispatch(setPageTitle('Manage Branch'));
+    getAllBranch();
+  }, []);
+
+  // useEffect(() => {
+  //   const newItems = [...filteredItems];
+
+  //   setFilteredItems(() => {
+  //     return newItems.filter((item: any) => {
+  //       return item.name.toLowerCase().includes(search.toLowerCase());
+  //     });
+  //   });
+  // }, [search]);
+
+  const getAllBranch = async () => {
     branchServ
       .getAllBranch()
       .then((res) => {
         console.log(res);
         setFilteredItems(res.data.response);
       })
-      .catch((err) => {});
-  }, []);
-
-  const deleteBranch = (id: number) => {
-    branchServ.deleteBranchServ(id).then((res) => {
-      console.log(res);
-      branchServ.getAllBranch().then((res) => {
-        setFilteredItems(res.data.response);
+      .catch((err) => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Có lỗi xảy ra',
+          padding: '2em',
+          customClass: 'sweet-alerts',
+        });
       });
-    });
   };
 
-  const editUser = (user: any = null) => {
+  const deleteBranch = (id: number) => {
+    branchServ
+      .deleteBranchServ(id)
+      .then((res) => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Xoá nhà hàng thành công',
+          padding: '2em',
+          customClass: 'sweet-alerts',
+        });
+        getAllBranch();
+      })
+      .catch((err) => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Có lỗi xảy ra',
+          padding: '2em',
+          customClass: 'sweet-alerts',
+        });
+      });
+  };
+
+  const editBranch = (branch: any = null) => {
+    if (branch) {
+      setValues({
+        name: branch.name,
+        decs: branch.decs,
+        phoneNumber: branch.phoneNumber,
+        address: branch.address,
+        id: branch.id,
+      });
+      setImages([
+        {
+          dataURL: branch.imgUrl,
+          file: null,
+        },
+      ]);
+    } else {
+      resetForm();
+      setImages([]);
+    }
     setAddContactModal(true);
   };
   const onChangeImage = (
@@ -96,7 +191,7 @@ const ManagerBranch = (props: Props) => {
               <button
                 type="button"
                 className="btn btn-primary"
-                onClick={() => editUser()}
+                onClick={() => editBranch()}
               >
                 <IconMenuCalendar className="ltr:mr-2 rtl:ml-2" />
                 Thêm nhà hàng
@@ -153,7 +248,7 @@ const ManagerBranch = (props: Props) => {
                         <button
                           type="button"
                           className="btn btn-sm btn-outline-primary"
-                          // onClick={() => editUser(contact)}
+                          onClick={() => editBranch(branch)}
                         >
                           Edit
                         </button>
@@ -333,6 +428,7 @@ const ManagerBranch = (props: Props) => {
                             }) => (
                               <div className="upload__image-wrapper">
                                 <button
+                                  type="button"
                                   className="custom-file-container__custom-file__custom-file-control"
                                   onClick={onImageUpload}
                                 >
@@ -370,7 +466,7 @@ const ManagerBranch = (props: Props) => {
                           className="btn btn-primary ltr:ml-4 rtl:mr-4"
                           // onClick={saveUser}
                         >
-                          Add
+                          {values.id ? 'Cập nhật' : 'Thêm'}
                         </button>
                       </div>
                     </form>

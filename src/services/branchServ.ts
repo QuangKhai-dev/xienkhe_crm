@@ -14,9 +14,12 @@ export const branchServ = {
   uploadImageBranch: (formData: any, id: number) => {
     return axios({
       method: 'POST',
-      url: `http://localhost:3000/branch/upload-branch-img/${id}`,
+      url: `http://localhost:3001/branch/upload-branch-img/${id}`,
       data: formData,
       headers: { 'Content-Type': 'multipart/form-data' },
     });
+  },
+  updateBranchServ: (data: any, id: number) => {
+    return https.put(`/branch/${id}`, data);
   },
 };

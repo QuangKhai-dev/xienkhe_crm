@@ -11,12 +11,14 @@ import IconX from '../../components/Icon/IconX';
 import * as Yup from 'yup';
 import ImageUploading, { ImageListType } from 'react-images-uploading';
 import { foodServ } from '../../services/foodServ';
+import Swal from 'sweetalert2';
 type Props = {};
 
 interface FormType {
   name: string;
   giaTien: string;
   moTa: string;
+  id: null | number;
 }
 
 const ManagerFood = (props: Props) => {
@@ -26,57 +28,139 @@ const ManagerFood = (props: Props) => {
   const [images, setImages] = useState<any>([]);
   const [search, setSearch] = useState<any>('');
   const [filteredItems, setFilteredItems] = useState<any>([]);
-  const { values, handleSubmit, handleBlur, handleChange, errors, touched } =
-    useFormik({
-      initialValues: {
-        name: '',
-        giaTien: '',
-        moTa: '',
-      },
-      onSubmit: async (values: FormType) => {
+  const {
+    values,
+    handleSubmit,
+    handleBlur,
+    handleChange,
+    errors,
+    touched,
+    setValues,
+    resetForm,
+  } = useFormik({
+    initialValues: {
+      id: null,
+      name: '',
+      giaTien: '',
+      moTa: '',
+    },
+    onSubmit: async (values: FormType, { resetForm }) => {
+      try {
         const formData = new FormData();
 
         for (let key in values) {
-          let value = values[key as keyof FormType];
-          formData.append(key, value);
+          if (key !== 'id') {
+            let value = values[key as keyof Omit<FormType, 'id'>] as string;
+            formData.append(key, value);
+          }
         }
         // tạo form data gửi hình
         // error when set form data is empty
-        formData.append('img', images[0].file);
-        foodServ.addFoodServ(formData).then((res) => {
-          foodServ.getAllFood();
+        if (!images[0].dataURL.includes('cloudinary')) {
+          formData.append('img', images[0].file);
+        }
+        if (values.id) {
+          await foodServ.updateFoodServ(formData, values.id as number);
+        } else {
+          await foodServ.addFoodServ(formData);
+        }
+        await getAllFood();
+        Swal.fire({
+          icon: 'success',
+          title: values.id
+            ? 'Cập nhật món ăn thành công'
+            : 'Thêm món ăn thành công',
+          padding: '2em',
+          customClass: 'sweet-alerts',
         });
+        setAddContactModal(false);
+        resetForm();
+        setImages([]);
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Có lỗi xảy ra',
+          padding: '2em',
+          customClass: 'sweet-alerts',
+        });
+      }
 
-        // await branchServ.uploadImageBranch(formData, res.data.response.id);
-        // await branchServ.getAllBranch();
-      },
-      validationSchema: Yup.object().shape({
-        name: Yup.string().required('Vui lòng không bỏ trống'),
-        giaTien: Yup.string().required('Vui lòng không bỏ trống'),
-        moTa: Yup.string().required('Vui lòng không bỏ trống'),
-      }),
-    });
+      // await branchServ.uploadImageBranch(formData, res.data.response.id);
+      // await branchServ.getAllBranch();
+    },
+    validationSchema: Yup.object().shape({
+      name: Yup.string().required('Vui lòng không bỏ trống'),
+      giaTien: Yup.number().required('Vui lòng không bỏ trống'),
+      moTa: Yup.string().required('Vui lòng không bỏ trống'),
+    }),
+  });
   useEffect(() => {
     dispatch(setPageTitle('Manage Food'));
+    getAllFood();
+  }, []);
+
+  const getAllFood = async () => {
     foodServ
       .getAllFood()
       .then((res) => {
-        console.log(res);
         setFilteredItems(res.data.response);
       })
-      .catch((err) => {});
-  }, []);
-
-  const deleteFood = (id: number) => {
-    foodServ.deleteFoodServ(id).then((res) => {
-      console.log(res);
-      foodServ.getAllFood().then((res) => {
-        setFilteredItems(res.data.response);
+      .catch((err) => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Có lỗi xảy ra',
+          padding: '2em',
+          customClass: 'sweet-alerts',
+        });
       });
-    });
   };
 
-  const editUser = (user: any = null) => {
+  const deleteFood = (id: number) => {
+    foodServ
+      .deleteFoodServ(id)
+      .then((res) => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Xoá món ăn thành công',
+          padding: '2em',
+          customClass: 'sweet-alerts',
+        });
+        console.log(res);
+        foodServ.getAllFood().then((res) => {
+          setFilteredItems(res.data.response);
+        });
+      })
+      .catch((err) => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Xoá món ăn thất bại',
+          padding: '2em',
+          customClass: 'sweet-alerts',
+        });
+      });
+  };
+
+  const editFood = (food: any = null) => {
+    if (food) {
+      setValues({
+        name: food.name,
+        giaTien: food.giaTien,
+        moTa: food.moTa,
+        id: food.id,
+      });
+      // change img to data url
+      const img = new Image();
+      img.src = food.img;
+      setImages([
+        {
+          dataURL: img.src,
+          file: new File([img.src], 'image.png', { type: 'image/png' }),
+        },
+      ]);
+    } else {
+      resetForm();
+      setImages([]);
+    }
     setAddContactModal(true);
   };
   const onChangeImage = (
@@ -95,28 +179,28 @@ const ManagerFood = (props: Props) => {
           </Link>
         </li>
         <li className="before:content-['/'] ltr:before:mr-2 rtl:before:ml-2">
-          <span>Danh sách nhà hàng</span>
+          <span>Danh sách món ăn</span>
         </li>
       </ul>
       <div className="flex items-center justify-between flex-wrap gap-4">
-        <h2 className="text-xl">Danh sách chi nhánh</h2>
+        <h2 className="text-xl">Danh sách món ăn</h2>
         <div className="flex sm:flex-row flex-col sm:items-center sm:gap-3 gap-4 w-full sm:w-auto">
           <div className="flex gap-3">
             <div>
               <button
                 type="button"
                 className="btn btn-primary"
-                onClick={() => editUser()}
+                onClick={() => editFood()}
               >
                 <IconMenuCalendar className="ltr:mr-2 rtl:ml-2" />
-                Thêm nhà hàng
+                Thêm món ăn
               </button>
             </div>
           </div>
           <div className="relative">
             <input
               type="text"
-              placeholder="Search Contacts"
+              placeholder="Tìm kiếm món ăn"
               className="form-input py-2 ltr:pr-11 rtl:pl-11 peer"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -175,7 +259,7 @@ const ManagerFood = (props: Props) => {
                         <button
                           type="button"
                           className="btn btn-sm btn-outline-primary"
-                          // onClick={() => editUser(contact)}
+                          onClick={() => editFood(food)}
                         >
                           Edit
                         </button>
@@ -338,6 +422,7 @@ const ManagerFood = (props: Props) => {
                             }) => (
                               <div className="upload__image-wrapper">
                                 <button
+                                  type="button"
                                   className="custom-file-container__custom-file__custom-file-control"
                                   onClick={onImageUpload}
                                 >
@@ -375,7 +460,7 @@ const ManagerFood = (props: Props) => {
                           className="btn btn-primary ltr:ml-4 rtl:mr-4"
                           // onClick={saveUser}
                         >
-                          Add
+                          {values.id ? 'Cập nhật' : 'Thêm'}
                         </button>
                       </div>
                     </form>

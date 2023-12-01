@@ -12,9 +12,49 @@ import IconFacebookCircle from '../../components/Icon/IconFacebookCircle';
 import IconTwitter from '../../components/Icon/IconTwitter';
 import IconGoogle from '../../components/Icon/IconGoogle';
 import Dropdown from '../../components/Dropdown';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+import { userServ } from '../../services/userServ';
+import withReactContent from 'sweetalert2-react-content';
+import Swal from 'sweetalert2';
+
+const MySwal = withReactContent(Swal);
 
 const LoginPage = () => {
   const dispatch = useDispatch();
+  const { values, errors, touched, handleChange, handleSubmit, handleBlur } =
+    useFormik({
+      initialValues: {
+        email: '',
+        password: '',
+      },
+      onSubmit: async (values) => {
+        try {
+          await userServ.loginServ(values);
+          await MySwal.fire({
+            title: 'Đăng nhập thành công',
+            toast: true,
+            position: 'bottom-start',
+            showConfirmButton: false,
+            timer: 5000,
+            showCloseButton: true,
+            customClass: 'swal2-swal5',
+          });
+          navigate('/');
+        } catch (error) {
+          console.log(error);
+        }
+      },
+      validationSchema: Yup.object({
+        email: Yup.string()
+          .email('Email không hợp lệ')
+          .required('Email không được để trống'),
+        password: Yup.string()
+          .min(4, 'Mật khẩu phải có ít nhất 6 ký tự')
+          .required('Mật khẩu không được để trống'),
+      }),
+    });
+
   useEffect(() => {
     dispatch(setPageTitle('Login Cover'));
   });
@@ -33,10 +73,6 @@ const LoginPage = () => {
     }
   };
   const [flag, setFlag] = useState(themeConfig.locale);
-
-  const submitForm = () => {
-    navigate('/');
-  };
 
   return (
     <div>
@@ -163,20 +199,30 @@ const LoginPage = () => {
                   Điền email và mật khẩu của bạn để đăng nhập
                 </p>
               </div>
-              <form className="space-y-5 dark:text-white" onSubmit={submitForm}>
+              <form
+                className="space-y-5 dark:text-white"
+                onSubmit={handleSubmit}
+              >
                 <div>
                   <label htmlFor="Email">Email</label>
                   <div className="relative text-white-dark">
                     <input
                       id="Email"
                       type="email"
+                      name="email"
                       placeholder="Điền Email"
                       className="form-input ps-10 placeholder:text-white-dark"
+                      value={values.email}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
                     />
                     <span className="absolute start-4 top-1/2 -translate-y-1/2">
                       <IconMail fill={true} />
                     </span>
                   </div>
+                  {errors.email && touched.email ? (
+                    <div className="text-danger mt-1">{errors.email}</div>
+                  ) : null}
                 </div>
                 <div>
                   <label htmlFor="Password">Mật khẩu</label>
@@ -186,11 +232,18 @@ const LoginPage = () => {
                       type="password"
                       placeholder="Điền mật khẩu"
                       className="form-input ps-10 placeholder:text-white-dark"
+                      name="password"
+                      value={values.password}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
                     />
                     <span className="absolute start-4 top-1/2 -translate-y-1/2">
                       <IconLockDots fill={true} />
                     </span>
                   </div>
+                  {errors.password && touched.password ? (
+                    <div className="text-danger mt-1">{errors.password}</div>
+                  ) : null}
                 </div>
                 <div>
                   <label className="flex cursor-pointer items-center">
