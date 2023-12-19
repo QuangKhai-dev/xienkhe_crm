@@ -2,14 +2,20 @@ import ManagerBranch from '../pages/Branch/ManagerBranch';
 import DashBoard from '../pages/DashBoard/DashBoard';
 import ManagerFood from '../pages/Food/ManagerFood';
 import LoginPage from '../pages/Login/Login';
+import Register from '../pages/Login/Register';
 import ManagerOrder from '../pages/OrderHistory/ManagerOrder';
 import ManageUser from '../pages/User/ManageUser';
+import VoucherManager from '../pages/VoucherManager/VoucherManager';
 
 const routes = [
   // dashboard
   {
     path: '/login',
     element: <LoginPage />,
+  },
+  {
+    path: '/register',
+    element: <Register />,
   },
   {
     path: '/',
@@ -38,6 +44,10 @@ const routes = [
   {
     path: '/manage-order-user',
     element: <ManagerOrder />,
+  },
+  {
+    path: '/manage-voucher',
+    element: <VoucherManager />,
   },
 ];
 

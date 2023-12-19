@@ -8,19 +8,13 @@ import {
   toggleSidebar,
 } from '../../store/themeConfigSlice';
 import { useTranslation } from 'react-i18next';
-import i18next from 'i18next';
 import Dropdown from '../Dropdown';
 import IconMenu from '../Icon/IconMenu';
-import IconCalendar from '../Icon/IconCalendar';
-import IconEdit from '../Icon/IconEdit';
-import IconChatNotification from '../Icon/IconChatNotification';
 import IconSearch from '../Icon/IconSearch';
 import IconXCircle from '../Icon/IconXCircle';
 import IconSun from '../Icon/IconSun';
 import IconMoon from '../Icon/IconMoon';
 import IconLaptop from '../Icon/IconLaptop';
-import IconMailDot from '../Icon/IconMailDot';
-import IconArrowLeft from '../Icon/IconArrowLeft';
 import IconInfoCircle from '../Icon/IconInfoCircle';
 import IconBellBing from '../Icon/IconBellBing';
 import IconUser from '../Icon/IconUser';
@@ -37,7 +31,7 @@ import IconMenuForms from '../Icon/Menu/IconMenuForms';
 import IconMenuPages from '../Icon/Menu/IconMenuPages';
 import IconMenuMore from '../Icon/Menu/IconMenuMore';
 
-const Header = () => {
+const Header = ({ user }: any) => {
   const location = useLocation();
   useEffect(() => {
     const selector = document.querySelector(
@@ -360,16 +354,16 @@ const Header = () => {
                       />
                       <div className="ltr:pl-4 rtl:pr-4 truncate">
                         <h4 className="text-base">
-                          John Doe
-                          <span className="text-xs bg-success-light rounded text-success px-1 ltr:ml-2 rtl:ml-2">
-                            Pro
+                          {user?.user?.name}
+                          <span className="text-xs bg-success-light rounded text-success px-1 ltr:ml-2 rtl:ml-2 uppercase font-bold">
+                            {user?.user?.role}
                           </span>
                         </h4>
                         <button
                           type="button"
                           className="text-black/60 hover:text-primary dark:text-dark-light/60 dark:hover:text-white"
                         >
-                          johndoe@gmail.com
+                          {user?.user?.email}
                         </button>
                       </div>
                     </div>
@@ -396,10 +390,16 @@ const Header = () => {
                     </Link>
                   </li>
                   <li className="border-t border-white-light dark:border-white-light/10">
-                    <Link to="/login" className="text-danger !py-3">
+                    <p
+                      onClick={() => {
+                        localStorage.removeItem('user');
+                        window.location.href = '/login';
+                      }}
+                      className="text-danger !py-3 flex px-4 cursor-pointer"
+                    >
                       <IconLogout className="w-4.5 h-4.5 ltr:mr-2 rtl:ml-2 rotate-90 shrink-0" />
                       Sign Out
-                    </Link>
+                    </p>
                   </li>
                 </ul>
               </Dropdown>

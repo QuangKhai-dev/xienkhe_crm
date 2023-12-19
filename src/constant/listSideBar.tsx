@@ -56,4 +56,15 @@ export const listSideBar = [
       },
     ],
   },
+  {
+    name: 'Quản lí voucher',
+    icon: <IconMinus className="w-4 h-5 flex-none hidden" />,
+    children: [
+      {
+        name: 'Danh sách voucher',
+        path: '/manage-voucher',
+        icon: <IconUser className="group-hover:!text-primary shrink-0" />,
+      },
+    ],
+  },
 ];

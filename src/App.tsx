@@ -261,11 +261,50 @@ function App({ children }: PropsWithChildren) {
   //   for (let i = 0; i < arrUser.length; i++) {
   //     axios({
   //       method: 'POST',
-  //       url: 'http://localhost:3000/auth/register',
+  //       url: 'http://localhost:8080/auth/register',
   //       data: arrUser[i],
   //     });
   //   }
   // }, []);
+
+  const arrVoucher = [
+    {
+      name: 'XE-20230101000000-001',
+      discount: 10,
+      description: 'Mô tả voucher 1',
+      expired: '2023-12-31T23:59:59.999Z',
+      createdAt: '2023-01-01T00:00:00.000Z',
+    },
+    {
+      name: 'XE-20230102000000-002',
+      discount: 20,
+      description: 'Mô tả voucher 2',
+      expired: '2023-12-31T23:59:59.999Z',
+      createdAt: '2023-01-02T00:00:00.000Z',
+    },
+    {
+      name: 'XE-20230103000000-003',
+      discount: 30,
+      description: 'Mô tả voucher 3',
+      expired: '2023-12-31T23:59:59.999Z',
+      createdAt: '2023-01-03T00:00:00.000Z',
+    },
+    {
+      name: 'XE-20230104000000-004',
+      discount: 40,
+      description: 'Mô tả voucher 4',
+      expired: '2023-12-31T23:59:59.999Z',
+      createdAt: '2023-01-04T00:00:00.000Z',
+    },
+    {
+      name: 'XE-20230105000000-005',
+      discount: 50,
+      description: 'Mô tả voucher 5',
+      expired: '2023-12-31T23:59:59.999Z',
+      createdAt: '2023-01-05T00:00:00.000Z',
+    },
+    // Thêm 45 mẫu dữ liệu khác ở đây
+  ];
 
   return (
     <div

@@ -5,6 +5,9 @@ export const userServ = {
   loginServ: (data: any) => {
     return https.post('/auth/login', data);
   },
+  registerServ: (data: any) => {
+    return https.post('/auth/register', data);
+  },
   getAllUser: () => {
     return https.get('/user/get-all');
   },
@@ -17,7 +20,7 @@ export const userServ = {
   uploadImageUser: (formData: any, id: number) => {
     return axios({
       method: 'POST',
-      url: `http://localhost:3001/user/upload-branch-img/${id}`,
+      url: `http://localhost:8080/user/upload-branch-img/${id}`,
       data: formData,
       headers: { 'Content-Type': 'multipart/form-data' },
     });
@@ -25,7 +28,7 @@ export const userServ = {
   updateUserServ: (formData: any, id: number) => {
     return axios({
       method: 'PUT',
-      url: `http://localhost:3001/user/update/${id}`,
+      url: `http://localhost:8080/user/update/${id}`,
       data: formData,
       headers: { 'Content-Type': 'multipart/form-data' },
     });

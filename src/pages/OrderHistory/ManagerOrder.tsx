@@ -76,15 +76,6 @@ const ManagerOrder = (props: Props) => {
     });
   };
 
-  const deleteFood = (id: number) => {
-    foodServ.deleteFoodServ(id).then((res) => {
-      console.log(res);
-      foodServ.getAllFood().then((res) => {
-        setFilteredItems(res.data.response);
-      });
-    });
-  };
-
   const editOrder = (user: any = null) => {
     setAddContactModal(true);
   };
@@ -156,8 +147,7 @@ const ManagerOrder = (props: Props) => {
               </tr>
             </thead>
             <tbody>
-              {filteredItems.map((order: any) => {
-                console.log(order);
+              {filteredItems?.map((order: any) => {
                 return (
                   <tr key={order.id}>
                     <td>
@@ -279,20 +269,9 @@ const ManagerOrder = (props: Props) => {
                           id="role"
                           defaultValue={optionBranch[0]}
                           options={optionBranch}
-                          // value={optionBranch.find((item) => {
-                          //   return values.role == item.value;
-                          // })}
                           isSearchable={false}
                           onBlur={handleBlur}
-                          // onChange={(type) => {
-                          //   setFieldValue('role', type?.value);
-                          // }}
                         />
-                        {/* {errors.role && touched.role ? (
-                          <div className="text-danger text-xs mt-1">
-                            {errors.role}
-                          </div>
-                        ) : null} */}
                       </div>
 
                       <div className="mb-5">

@@ -4,7 +4,7 @@ import { routes } from './routes';
 import DefaultLayout from '../components/Layout/DefaultLayout';
 
 const finalRoutes = routes.map((route) => {
-  if (route.path === '/login') {
+  if (route.path === '/login' || route.path === '/register') {
     return { ...route };
   } else {
     return {

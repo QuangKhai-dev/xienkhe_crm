@@ -15,7 +15,7 @@ const DefaultLayout = ({ children }: PropsWithChildren) => {
 
   const [showLoader, setShowLoader] = useState(true);
   const [showTopButton, setShowTopButton] = useState(false);
-
+  const [user, setUser] = useState({} as any);
   const goToTop = () => {
     document.body.scrollTop = 0;
     document.documentElement.scrollTop = 0;
@@ -46,6 +46,16 @@ const DefaultLayout = ({ children }: PropsWithChildren) => {
     return () => {
       window.removeEventListener('onscroll', onScrollHandler);
     };
+  }, []);
+
+  useEffect(() => {
+    // check user login with local storage
+    const user = localStorage.getItem('user');
+    if (!user) {
+      window.location.href = '/login';
+    } else {
+      setUser(JSON.parse(user));
+    }
   }, []);
 
   return (
@@ -130,7 +140,7 @@ const DefaultLayout = ({ children }: PropsWithChildren) => {
 
           <div className="main-content flex flex-col min-h-screen">
             {/* BEGIN TOP NAVBAR */}
-            <Header />
+            <Header user={user} />
             {/* END TOP NAVBAR */}
 
             {/* BEGIN CONTENT AREA */}

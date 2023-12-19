@@ -11,7 +11,7 @@ export const foodServ = {
   addFoodServ: (data: any) => {
     return axios({
       method: 'POST',
-      url: `http://localhost:3001/food`,
+      url: `http://localhost:8080/food`,
       data: data,
       headers: { 'Content-Type': 'multipart/form-data' },
     });
@@ -19,7 +19,7 @@ export const foodServ = {
   updateFoodServ: (data: any, id: number) => {
     return axios({
       method: 'PUT',
-      url: `http://localhost:3001/food/${id}`,
+      url: `http://localhost:8080/food/${id}`,
       data: data,
       headers: { 'Content-Type': 'multipart/form-data' },
     });

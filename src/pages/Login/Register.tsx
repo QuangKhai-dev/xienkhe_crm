@@ -1,36 +1,39 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
 import { setPageTitle, toggleRTL } from '../../store/themeConfigSlice';
+import { Link, useNavigate } from 'react-router-dom';
 import { IRootState } from '../../store';
-import i18next from 'i18next';
+import Dropdown from '../../components/Dropdown';
 import IconCaretDown from '../../components/Icon/IconCaretDown';
+import i18next from 'i18next';
+import IconUser from '../../components/Icon/IconUser';
 import IconMail from '../../components/Icon/IconMail';
 import IconLockDots from '../../components/Icon/IconLockDots';
 import IconInstagram from '../../components/Icon/IconInstagram';
 import IconFacebookCircle from '../../components/Icon/IconFacebookCircle';
 import IconTwitter from '../../components/Icon/IconTwitter';
 import IconGoogle from '../../components/Icon/IconGoogle';
-import Dropdown from '../../components/Dropdown';
 import { useFormik } from 'formik';
-import * as Yup from 'yup';
 import { userServ } from '../../services/userServ';
-import withReactContent from 'sweetalert2-react-content';
 import Swal from 'sweetalert2';
-
+import withReactContent from 'sweetalert2-react-content';
+import * as Yup from 'yup';
 const MySwal = withReactContent(Swal);
+type Props = {};
 
-const LoginPage = () => {
+const Register = (props: Props) => {
   const dispatch = useDispatch();
   const { values, errors, touched, handleChange, handleSubmit, handleBlur } =
     useFormik({
       initialValues: {
+        name: '',
         email: '',
         password: '',
+        phoneNumber: '',
       },
       onSubmit: async (values) => {
         try {
-          const res = await userServ.loginServ(values);
+          await userServ.registerServ(values);
           await MySwal.fire({
             title: 'Đăng nhập thành công',
             toast: true,
@@ -40,9 +43,7 @@ const LoginPage = () => {
             showCloseButton: true,
             customClass: 'swal2-swal5',
           });
-          // lưu dữ liệu xuống localStorage
-          localStorage.setItem('user', JSON.stringify(res.data));
-          navigate('/');
+          navigate('/login');
         } catch (error: any) {
           const toast = Swal.mixin({
             toast: true,
@@ -60,17 +61,18 @@ const LoginPage = () => {
         }
       },
       validationSchema: Yup.object({
+        name: Yup.string().required('Tên không được để trống'),
         email: Yup.string()
           .email('Email không hợp lệ')
           .required('Email không được để trống'),
         password: Yup.string()
           .min(4, 'Mật khẩu phải có ít nhất 6 ký tự')
           .required('Mật khẩu không được để trống'),
+        phoneNumber: Yup.string().required('Số điện thoại không được để trống'),
       }),
     });
-
   useEffect(() => {
-    dispatch(setPageTitle('Login Cover'));
+    dispatch(setPageTitle('Register Cover'));
   });
   const navigate = useNavigate();
   const isRtl =
@@ -87,6 +89,10 @@ const LoginPage = () => {
     }
   };
   const [flag, setFlag] = useState(themeConfig.locale);
+
+  const submitForm = () => {
+    navigate('/');
+  };
 
   return (
     <div>
@@ -123,16 +129,11 @@ const LoginPage = () => {
             <div className="absolute inset-y-0 w-8 from-primary/10 via-transparent to-transparent ltr:-right-10 ltr:bg-gradient-to-r rtl:-left-10 rtl:bg-gradient-to-l xl:w-16 ltr:xl:-right-20 rtl:xl:-left-20"></div>
             <div className="ltr:xl:-skew-x-[14deg] rtl:xl:skew-x-[14deg]">
               <Link to="/" className="w-48 block lg:w-72 ms-10">
-                {/* <img
-                  src="/assets/images/auth/logo-white.svg"
-                  alt="Logo"
-                  className="w-full"
-                /> */}
                 <p className="text-white text-6xl font-bold">Xiên Khè</p>
               </Link>
               <div className="mt-24 hidden w-full max-w-[430px] lg:block">
                 <img
-                  src="/assets/images/auth/login.svg"
+                  src="/assets/images/auth/register.svg"
                   alt="Cover Image"
                   className="w-full"
                 />
@@ -142,11 +143,7 @@ const LoginPage = () => {
           <div className="relative flex w-full flex-col items-center justify-center gap-6 px-4 pb-16 pt-6 sm:px-6 lg:max-w-[667px]">
             <div className="flex w-full max-w-[440px] items-center gap-2 lg:absolute lg:end-6 lg:top-6 lg:max-w-full">
               <Link to="/" className="w-8 block lg:hidden">
-                <img
-                  src="/assets/images/logo.svg"
-                  alt="Logo"
-                  className="mx-auto w-10"
-                />
+                <p className="text-white text-6xl font-bold">Xiên Khè</p>
               </Link>
               <div className="dropdown ms-auto w-max">
                 <Dropdown
@@ -207,10 +204,10 @@ const LoginPage = () => {
             <div className="w-full max-w-[440px] lg:mt-16">
               <div className="mb-10">
                 <h1 className="text-3xl font-extrabold uppercase !leading-snug text-primary md:text-4xl">
-                  Đăng nhập
+                  Đăng ký
                 </h1>
                 <p className="text-base font-bold leading-normal text-white-dark">
-                  Điền email và mật khẩu của bạn để đăng nhập
+                  Điền thông tin để đăng ký tài khoản
                 </p>
               </div>
               <form
@@ -218,13 +215,34 @@ const LoginPage = () => {
                 onSubmit={handleSubmit}
               >
                 <div>
-                  <label htmlFor="Email">Email</label>
+                  <label htmlFor="name">Họ tên</label>
                   <div className="relative text-white-dark">
                     <input
-                      id="Email"
+                      id="name"
+                      type="text"
+                      name="name"
+                      placeholder="Vui lòng điền tên"
+                      className="form-input ps-10 placeholder:text-white-dark"
+                      value={values.name}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                    />
+                    <span className="absolute start-4 top-1/2 -translate-y-1/2">
+                      <IconUser fill={true} />
+                    </span>
+                  </div>
+                  {errors.name && touched.name ? (
+                    <div className="text-danger mt-1">{errors.name}</div>
+                  ) : null}
+                </div>
+                <div>
+                  <label htmlFor="email">Email</label>
+                  <div className="relative text-white-dark">
+                    <input
+                      id="email"
                       type="email"
                       name="email"
-                      placeholder="Điền Email"
+                      placeholder="Vui lòng điền email"
                       className="form-input ps-10 placeholder:text-white-dark"
                       value={values.email}
                       onChange={handleChange}
@@ -236,6 +254,27 @@ const LoginPage = () => {
                   </div>
                   {errors.email && touched.email ? (
                     <div className="text-danger mt-1">{errors.email}</div>
+                  ) : null}
+                </div>
+                <div>
+                  <label htmlFor="phoneNumber">Số điện thoại</label>
+                  <div className="relative text-white-dark">
+                    <input
+                      id="phoneNumber"
+                      type="phoneNumber"
+                      name="phoneNumber"
+                      placeholder="Vui lòng điền số điện thoại"
+                      className="form-input ps-10 placeholder:text-white-dark"
+                      value={values.phoneNumber}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                    />
+                    <span className="absolute start-4 top-1/2 -translate-y-1/2">
+                      <IconMail fill={true} />
+                    </span>
+                  </div>
+                  {errors.phoneNumber && touched.phoneNumber ? (
+                    <div className="text-danger mt-1">{errors.phoneNumber}</div>
                   ) : null}
                 </div>
                 <div>
@@ -259,27 +298,19 @@ const LoginPage = () => {
                     <div className="text-danger mt-1">{errors.password}</div>
                   ) : null}
                 </div>
-                <div>
-                  <label className="flex cursor-pointer items-center">
-                    <input
-                      type="checkbox"
-                      className="form-checkbox bg-white dark:bg-black mr-2"
-                    />
-                    <span className="text-white-dark">Lưu mật khẩu</span>
-                  </label>
-                </div>
+
                 <button
                   type="submit"
-                  className="btn btn-gradient !mt-6 w-full border-0 uppercase shadow-[0_10px_20px_-10px_rgba(67,97,238,0.44)] duration-300"
+                  className="btn btn-gradient !mt-6 w-full border-0 uppercase shadow-[0_10px_20px_-10px_rgba(67,97,238,0.44)]"
                 >
-                  Đăng nhập
+                  Đăng ký
                 </button>
               </form>
 
               <div className="relative my-7 text-center md:mb-9">
                 <span className="absolute inset-x-0 top-1/2 h-px w-full -translate-y-1/2 bg-white-light dark:bg-white-dark"></span>
                 <span className="relative bg-white px-2 font-bold uppercase text-white-dark dark:bg-dark dark:text-white-light">
-                  Hoặc
+                  or
                 </span>
               </div>
               <div className="mb-10 md:mb-[60px]">
@@ -335,17 +366,17 @@ const LoginPage = () => {
                 </ul>
               </div>
               <div className="text-center dark:text-white">
-                Bạn chưa có tài khoản?
+                Already have an account ?&nbsp;
                 <Link
-                  to="/register"
-                  className="uppercase text-primary underline transition hover:text-black dark:hover:text-white ml-2"
+                  to="/login"
+                  className="uppercase text-primary underline transition hover:text-black dark:hover:text-white"
                 >
-                  Đăng ký
+                  SIGN IN
                 </Link>
               </div>
             </div>
             <p className="absolute bottom-6 w-full text-center dark:text-white">
-              © {new Date().getFullYear()}.Quang Khải All Rights Reserved.
+              © {new Date().getFullYear()}.VRISTO All Rights Reserved.
             </p>
           </div>
         </div>
@@ -354,4 +385,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default Register;
