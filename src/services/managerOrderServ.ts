@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { https } from './configServ';
 
 export const managerOrderServ = {
@@ -10,5 +9,11 @@ export const managerOrderServ = {
   },
   addManagerOrderServ: (data: any) => {
     return https.post('/user', data);
+  },
+  addOrderTable: (data: any) => {
+    return https.post('/user/order-table', data);
+  },
+  updateManagerOrderServ: (data: any) => {
+    return https.put('/manager-order/update', data);
   },
 };

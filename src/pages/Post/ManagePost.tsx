@@ -1,6 +1,5 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { branchServ } from '../../services/branchServ';
 import { useDispatch } from 'react-redux';
 import { setPageTitle } from '../../store/themeConfigSlice';
 import IconSearch from '../../components/Icon/IconSearch';
@@ -9,28 +8,32 @@ import IconMenuCalendar from '../../components/Icon/Menu/IconMenuCalendar';
 import { Dialog, Transition } from '@headlessui/react';
 import IconX from '../../components/Icon/IconX';
 import * as Yup from 'yup';
-import ImageUploading, { ImageListType } from 'react-images-uploading';
-import { foodServ } from '../../services/foodServ';
 import Swal from 'sweetalert2';
+import moment from 'moment';
 import Select from 'react-select';
+import ImageUploading, { ImageListType } from 'react-images-uploading';
+import { postServ } from '../../services/postServ';
+import { userServ } from '../../services/userServ';
+
 type Props = {};
 
 interface FormType {
-  name: string;
-  giaTien: string;
-  moTa: string;
   id: null | number;
-  categoryId: number;
+  title: string;
+  data: string;
+  userId: string;
 }
 
-const ManagerFood = (props: Props) => {
+const ManagePost = (props: Props) => {
   const dispatch = useDispatch();
   const maxNumber = 69;
   const [addContactModal, setAddContactModal] = useState<any>(false);
-  const [category, setCategory] = useState<any>([]); // [1,2,3
+  const [listUser, setListUser] = useState<any>([]);
   const [images, setImages] = useState<any>([]);
   const [search, setSearch] = useState<any>('');
+  const [contactList, setContactList] = useState<any>([]);
   const [filteredItems, setFilteredItems] = useState<any>([]);
+  const [optionUser, setOptionUser] = useState<any>({});
   const {
     values,
     handleSubmit,
@@ -38,16 +41,15 @@ const ManagerFood = (props: Props) => {
     handleChange,
     errors,
     touched,
+    setFieldValue,
     setValues,
     resetForm,
-    setFieldValue,
   } = useFormik({
     initialValues: {
       id: null,
-      name: '',
-      giaTien: '',
-      moTa: '',
-      categoryId: 1,
+      title: '',
+      data: '',
+      userId: '',
     },
     onSubmit: async (values: FormType, { resetForm }) => {
       try {
@@ -65,16 +67,16 @@ const ManagerFood = (props: Props) => {
           formData.append('img', images[0].file);
         }
         if (values.id) {
-          await foodServ.updateFoodServ(formData, values.id as number);
+          await postServ.updatePostServ(values.id as number, formData);
         } else {
-          await foodServ.addFoodServ(formData);
+          await postServ.createPost(formData);
         }
-        await getAllFood();
+        await getAllPost();
         Swal.fire({
           icon: 'success',
           title: values.id
-            ? 'Cập nhật món ăn thành công'
-            : 'Thêm món ăn thành công',
+            ? 'Cập nhật tin tức thành công'
+            : 'Thêm tin tức thành công',
           padding: '2em',
           customClass: 'sweet-alerts',
         });
@@ -82,7 +84,6 @@ const ManagerFood = (props: Props) => {
         resetForm();
         setImages([]);
       } catch (error) {
-        console.log(error);
         Swal.fire({
           icon: 'error',
           title: 'Có lỗi xảy ra',
@@ -90,38 +91,33 @@ const ManagerFood = (props: Props) => {
           customClass: 'sweet-alerts',
         });
       }
-
-      // await branchServ.uploadImageBranch(formData, res.data.response.id);
-      // await branchServ.getAllBranch();
     },
     validationSchema: Yup.object().shape({
-      name: Yup.string().required('Vui lòng không bỏ trống'),
-      giaTien: Yup.number().required('Vui lòng không bỏ trống'),
-      moTa: Yup.string().required('Vui lòng không bỏ trống'),
-      categoryId: Yup.number().required('Vui lòng không bỏ trống'),
+      title: Yup.string().required('Vui lòng nhập tiêu đề'),
+      data: Yup.string().required('Vui lòng nhập nội dung'),
+      userId: Yup.string().required('Vui lòng nhập người đăng'),
     }),
   });
   useEffect(() => {
-    dispatch(setPageTitle('Manage Food'));
-    getAllFood();
-
-    foodServ
-      .getCategory()
-      .then((res) => {
-        setCategory(
-          res.data.response.map((item: any) => {
-            return { value: item.id, label: item.name };
-          })
-        );
-      })
-      .catch((err) => {});
+    dispatch(setPageTitle('Manage Branch'));
+    getAllPost();
+    getAllUser();
   }, []);
 
-  const getAllFood = async () => {
-    foodServ
-      .getAllFood()
+  useEffect(() => {
+    setFilteredItems(() => {
+      return contactList?.filter((item: any) => {
+        return item.title.toLowerCase().includes(search.toLowerCase());
+      });
+    });
+  }, [search, contactList]);
+
+  const getAllPost = async () => {
+    postServ
+      .getAllPost()
       .then((res) => {
-        setFilteredItems(res.data.response);
+        console.log(res);
+        setContactList(res.data);
       })
       .catch((err) => {
         Swal.fire({
@@ -133,43 +129,63 @@ const ManagerFood = (props: Props) => {
       });
   };
 
-  const deleteFood = (id: number) => {
-    foodServ
-      .deleteFoodServ(id)
+  const getAllUser = async () => {
+    userServ
+      .getAllUser()
+      .then((res) => {
+        console.log(res);
+        const optionUser = res.data.response.map(
+          (user: { name: string; id: number }) => {
+            return {
+              label: user.name,
+              value: user.id,
+            };
+          }
+        );
+        setListUser(optionUser);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  const deletePost = (id: number) => {
+    postServ
+      .deletePost(id)
       .then((res) => {
         Swal.fire({
           icon: 'success',
-          title: 'Xoá món ăn thành công',
+          title: 'Xoá tin tức thành công',
           padding: '2em',
           customClass: 'sweet-alerts',
         });
-        console.log(res);
-        foodServ.getAllFood().then((res) => {
-          setFilteredItems(res.data.response);
-        });
+        getAllPost();
       })
       .catch((err) => {
         Swal.fire({
           icon: 'error',
-          title: 'Xoá món ăn thất bại',
+          title: 'Có lỗi xảy ra',
           padding: '2em',
           customClass: 'sweet-alerts',
         });
       });
   };
 
-  const editFood = (food: any = null) => {
-    if (food) {
+  const editPost = (post: any = null) => {
+    if (post) {
       setValues({
-        name: food.name,
-        giaTien: food.giaTien,
-        moTa: food.moTa,
-        id: food.id,
-        categoryId: food.categoryId,
+        id: post.id,
+        title: post.title,
+        data: post.data,
+        userId: post.user.id,
       });
+      const optionUser = listUser.find(
+        (user: any) => user.value === post.user.id
+      );
+      setOptionUser(optionUser);
       // change img to data url
       const img = new Image();
-      img.src = food.img;
+      img.src = post.img;
       setImages([
         {
           dataURL: img.src,
@@ -182,6 +198,7 @@ const ManagerFood = (props: Props) => {
     }
     setAddContactModal(true);
   };
+
   const onChangeImage = (
     imageList: ImageListType,
     addUpdateIndex: number[] | undefined
@@ -198,28 +215,28 @@ const ManagerFood = (props: Props) => {
           </Link>
         </li>
         <li className="before:content-['/'] ltr:before:mr-2 rtl:before:ml-2">
-          <span>Danh sách món ăn</span>
+          <span>Danh sách tin tức</span>
         </li>
       </ul>
       <div className="flex items-center justify-between flex-wrap gap-4">
-        <h2 className="text-xl">Danh sách món ăn</h2>
+        <h2 className="text-xl">Danh sách tin tức</h2>
         <div className="flex sm:flex-row flex-col sm:items-center sm:gap-3 gap-4 w-full sm:w-auto">
           <div className="flex gap-3">
             <div>
               <button
                 type="button"
                 className="btn btn-primary"
-                onClick={() => editFood()}
+                onClick={() => editPost()}
               >
                 <IconMenuCalendar className="ltr:mr-2 rtl:ml-2" />
-                Thêm món ăn
+                Thêm tin tức
               </button>
             </div>
           </div>
           <div className="relative">
             <input
               type="text"
-              placeholder="Tìm kiếm món ăn"
+              placeholder="Search Contacts"
               className="form-input py-2 ltr:pr-11 rtl:pl-11 peer"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -239,53 +256,54 @@ const ManagerFood = (props: Props) => {
             <thead>
               <tr>
                 <th>Id</th>
-                <th>Tên món ăn</th>
+                <th>Tên tiêu đề</th>
                 <th>Hình ảnh</th>
-                <th>Giá tiền</th>
-                <th>Trạng thái</th>
+                <th>Nội dung</th>
+                <th>Người tạo</th>
+                <th>Ngày tạo</th>
                 <th className="!text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredItems.map((food: any) => {
+              {filteredItems.map((post: any) => {
+                console.log(post);
                 return (
-                  <tr key={food.id}>
+                  <tr key={post.id}>
                     <td>
                       <div className="flex items-center w-max">
-                        <div>{food.id}</div>
+                        <div>{post.id}</div>
                       </div>
                     </td>
-                    <td>{food.name}</td>
+                    <td>{post.title}</td>
                     <td className="whitespace-nowrap">
-                      <img src={food.img} width={50} alt="" />
+                      <img src={post.img} width={50} alt="" />
                     </td>
-                    <td className="whitespace-nowrap">{food.giaTien}</td>
                     <td className="whitespace-nowrap">
-                      <div>
-                        <label className="w-12 h-6 relative mb-0">
-                          <input
-                            type="checkbox"
-                            className="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
-                            id="custom_switch_checkbox1"
-                            checked={food.status}
-                          />
-                          <span className="bg-[#ebedf2] dark:bg-dark block h-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300 "></span>
-                        </label>
-                      </div>
+                      <p className="w-96 truncate">{post.data}</p>
+                    </td>
+                    <td className="whitespace-nowrap">
+                      <span className="badge badge-outline-success">
+                        {post.user.name}
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap">
+                      <span className="badge badge-outline-info">
+                        {moment(post.createdAt).format('DD-MM-YYYY')}
+                      </span>
                     </td>
                     <td>
                       <div className="flex gap-4 items-center justify-center">
                         <button
                           type="button"
                           className="btn btn-sm btn-outline-primary"
-                          onClick={() => editFood(food)}
+                          onClick={() => editPost(post)}
                         >
                           Edit
                         </button>
                         <button
                           type="button"
                           className="btn btn-sm btn-outline-danger"
-                          onClick={() => deleteFood(food.id)}
+                          onClick={() => deletePost(post.id)}
                         >
                           Delete
                         </button>
@@ -336,82 +354,64 @@ const ManagerFood = (props: Props) => {
                     <IconX />
                   </button>
                   <div className="text-lg font-medium bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-5 rtl:pr-5 py-3 ltr:pr-[50px] rtl:pl-[50px]">
-                    Add Contact
+                    Thêm voucher
                   </div>
                   <div className="p-5">
                     <form onSubmit={handleSubmit}>
                       <div className="mb-5">
-                        <label htmlFor="name">Tên món ăn</label>
+                        <label htmlFor="title">Tiêu đề bài viết</label>
                         <input
-                          id="name"
+                          id="title"
                           type="text"
-                          placeholder="Nhập tên món ăn"
-                          name="name"
+                          placeholder="Nhập tiêu đề bài viết"
+                          name="title"
                           className={`form-input ${
-                            errors.name && touched.name ? 'has-error' : ''
+                            errors.title && touched.title ? 'has-error' : ''
                           }`}
-                          value={values.name}
+                          value={values.title}
                           onChange={handleChange}
                           onBlur={handleBlur}
                         />
-                        {errors.name && touched.name ? (
+                        {errors.title && touched.title ? (
                           <div className="text-danger text-xs mt-1">
-                            {errors.name}
+                            {errors.title}
                           </div>
                         ) : null}
                       </div>
                       <div className="mb-5">
-                        <label htmlFor="categoryId">Loại món</label>
+                        <label htmlFor="userId">Người tạo</label>
                         <Select
-                          defaultValue={category[0]}
-                          options={category}
-                          onBlur={handleBlur}
+                          name="userId"
+                          options={listUser}
                           isSearchable={false}
-                          onChange={(type) => {
-                            setFieldValue('categoryId', type?.value);
+                          onChange={(option: any) => {
+                            setFieldValue('userId', option?.value);
                           }}
-                          name="categoryId"
+                          value={optionUser}
                         />
-                        {errors.categoryId && touched.categoryId ? (
+                        {errors.userId && touched.userId ? (
                           <div className="text-danger text-xs mt-1">
-                            {errors.categoryId}
+                            {errors.userId}
                           </div>
                         ) : null}
                       </div>
                       <div className="mb-5">
-                        <label htmlFor="giaTien">Giá tiền</label>
+                        <label htmlFor="data">Nội dung bài viết</label>
                         <input
-                          id="giaTien"
+                          id="data"
                           type="text"
-                          placeholder="Vui lòng nhập giá tiền"
-                          name="giaTien"
-                          className="form-input"
-                          value={values.giaTien}
+                          placeholder="Số lượng mô tả"
+                          name="data"
+                          className={`form-input ${
+                            errors.data && touched.data ? 'has-error' : ''
+                          }`}
+                          value={values.data}
                           onChange={handleChange}
                           onBlur={handleBlur}
                         />
-                        {errors.giaTien && touched.giaTien ? (
+                        {errors.data && touched.data ? (
                           <div className="text-danger text-xs mt-1">
-                            {errors.giaTien}
-                          </div>
-                        ) : null}
-                      </div>
-
-                      <div className="mb-5">
-                        <label htmlFor="moTa">Mô tả</label>
-                        <input
-                          id="moTa"
-                          type="text"
-                          name="moTa"
-                          placeholder="Vui lòng nhập mô tả"
-                          className="form-input"
-                          value={values.moTa}
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                        />
-                        {errors.moTa && touched.moTa ? (
-                          <div className="text-danger text-xs mt-1">
-                            {errors.moTa}
+                            {errors.data}
                           </div>
                         ) : null}
                       </div>
@@ -483,7 +483,6 @@ const ManagerFood = (props: Props) => {
                           </ImageUploading>
                         </div>
                       </div>
-
                       <div className="flex justify-end items-center mt-8">
                         <button
                           type="button"
@@ -512,4 +511,4 @@ const ManagerFood = (props: Props) => {
   );
 };
 
-export default ManagerFood;
+export default ManagePost;

@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setPageTitle } from '../../store/themeConfigSlice';
@@ -12,13 +12,13 @@ import Swal from 'sweetalert2';
 import { voucherServ } from '../../services/voucherServ';
 import moment from 'moment';
 import Select from 'react-select';
-import Flatpickr from 'react-flatpickr';
 type Props = {};
 
 const VoucherManager = (props: Props) => {
   const dispatch = useDispatch();
   const [addContactModal, setAddContactModal] = useState<any>(false);
   const [search, setSearch] = useState<any>('');
+  const [contactList, setContactList] = useState<any>([]);
   const [filteredItems, setFilteredItems] = useState<any>([]);
 
   const {
@@ -29,7 +29,6 @@ const VoucherManager = (props: Props) => {
     errors,
     touched,
     setFieldValue,
-    setFieldError,
   } = useFormik({
     initialValues: {
       amount: '',
@@ -80,24 +79,20 @@ const VoucherManager = (props: Props) => {
     getAllVoucher();
   }, []);
 
-  // console.log(moment(Date.now()).format('DD-MM-YYYY'));
-
-  // useEffect(() => {
-  //   const newItems = [...filteredItems];
-
-  //   setFilteredItems(() => {
-  //     return newItems.filter((item: any) => {
-  //       return item.name.toLowerCase().includes(search.toLowerCase());
-  //     });
-  //   });
-  // }, [search]);
+  useEffect(() => {
+    setFilteredItems(() => {
+      return contactList.filter((item: any) => {
+        return item.name.toLowerCase().includes(search.toLowerCase());
+      });
+    });
+  }, [search, contactList]);
 
   const getAllVoucher = async () => {
     voucherServ
       .getAllVoucher()
       .then((res) => {
         console.log(res);
-        setFilteredItems(res.data);
+        setContactList(res.data);
       })
       .catch((err) => {
         Swal.fire({

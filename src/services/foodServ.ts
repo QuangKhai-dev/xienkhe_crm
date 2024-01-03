@@ -24,4 +24,7 @@ export const foodServ = {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
+  getCategory: () => {
+    return https.get('/category-food');
+  },
 };

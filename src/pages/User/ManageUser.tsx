@@ -12,6 +12,7 @@ import { Link } from 'react-router-dom';
 import IconMenuCalendar from '../../components/Icon/Menu/IconMenuCalendar';
 import Select from 'react-select';
 import Swal from 'sweetalert2';
+import { foodServ } from '../../services/foodServ';
 const optionsRole = [
   { value: '', label: 'Chọn chức vụ' },
   { value: 'user', label: 'User' },
@@ -33,6 +34,7 @@ const ManageUser = () => {
   const [addContactModal, setAddContactModal] = useState<any>(false);
   const [images, setImages] = useState<any>([]);
   const [search, setSearch] = useState<any>('');
+  const [contactList, setContactList] = useState<any>([]);
   const [filteredItems, setFilteredItems] = useState<any>([]);
   const {
     values,
@@ -83,7 +85,8 @@ const ManageUser = () => {
             customClass: 'sweet-alerts',
           });
         }
-
+        getAllUser();
+        setImages([]);
         setAddContactModal(false);
         resetForm();
       } catch (error) {
@@ -109,13 +112,19 @@ const ManageUser = () => {
     getAllUser();
   }, []);
 
+  useEffect(() => {
+    setFilteredItems(() => {
+      return contactList.filter((item: any) => {
+        return item.name.toLowerCase().includes(search.toLowerCase());
+      });
+    });
+  }, [search, contactList]);
+
   const getAllUser = () => {
     userServ
       .getAllUser()
       .then((res) => {
-        setFilteredItems(
-          res.data.response.filter((item: any) => item.isActive)
-        );
+        setContactList(res.data.response.filter((item: any) => item.isActive));
       })
       .catch((err) => {});
   };

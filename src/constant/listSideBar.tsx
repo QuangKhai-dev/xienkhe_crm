@@ -27,11 +27,11 @@ export const listSideBar = [
         path: '/manage-branch',
         icon: <IconUser className="group-hover:!text-primary shrink-0" />,
       },
-      {
-        name: 'Quản lí món ăn chi nhánh',
-        path: '/manage-food-branch',
-        icon: <IconUser className="group-hover:!text-primary shrink-0" />,
-      },
+      // {
+      //   name: 'Quản lí món ăn chi nhánh',
+      //   path: '/manage-food-branch',
+      //   icon: <IconUser className="group-hover:!text-primary shrink-0" />,
+      // },
     ],
   },
   {
@@ -63,6 +63,17 @@ export const listSideBar = [
       {
         name: 'Danh sách voucher',
         path: '/manage-voucher',
+        icon: <IconUser className="group-hover:!text-primary shrink-0" />,
+      },
+    ],
+  },
+  {
+    name: 'Quản lí tin tức',
+    icon: <IconMinus className="w-4 h-5 flex-none hidden" />,
+    children: [
+      {
+        name: 'Danh sách tin tức',
+        path: '/manage-tin-tuc',
         icon: <IconUser className="group-hover:!text-primary shrink-0" />,
       },
     ],

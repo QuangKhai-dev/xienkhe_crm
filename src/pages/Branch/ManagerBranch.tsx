@@ -20,6 +20,7 @@ const ManagerBranch = (props: Props) => {
   const [addContactModal, setAddContactModal] = useState<any>(false);
   const [images, setImages] = useState<any>([]);
   const [search, setSearch] = useState<any>('');
+  const [contactList, setContactList] = useState<any>([]);
   const [filteredItems, setFilteredItems] = useState<any>([]);
   const {
     values,
@@ -103,13 +104,19 @@ const ManagerBranch = (props: Props) => {
   //     });
   //   });
   // }, [search]);
-
+  useEffect(() => {
+    setFilteredItems(() => {
+      return contactList.filter((item: any) => {
+        return item.name.toLowerCase().includes(search.toLowerCase());
+      });
+    });
+  }, [search, contactList]);
   const getAllBranch = async () => {
     branchServ
       .getAllBranch()
       .then((res) => {
         console.log(res);
-        setFilteredItems(res.data.response);
+        setContactList(res.data.response);
       })
       .catch((err) => {
         Swal.fire({

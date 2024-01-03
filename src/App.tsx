@@ -1,8 +1,5 @@
 import React, { PropsWithChildren, useEffect } from 'react';
-import { Route, Routes } from 'react-router-dom';
-import Login from './pages/Login/Login';
-import axios from 'axios';
-import AdminTemplate from './templates/AdminTemplate/AdminTemplate';
+
 import themeConfig from './theme.config';
 import store from './store';
 

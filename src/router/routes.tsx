@@ -4,6 +4,7 @@ import ManagerFood from '../pages/Food/ManagerFood';
 import LoginPage from '../pages/Login/Login';
 import Register from '../pages/Login/Register';
 import ManagerOrder from '../pages/OrderHistory/ManagerOrder';
+import ManagePost from '../pages/Post/ManagePost';
 import ManageUser from '../pages/User/ManageUser';
 import VoucherManager from '../pages/VoucherManager/VoucherManager';
 
@@ -29,10 +30,10 @@ const routes = [
     path: '/manage-branch',
     element: <ManagerBranch />,
   },
-  {
-    path: '/manage-food-branch',
-    element: <ManagerBranch />,
-  },
+  // {
+  //   path: '/manage-food-branch',
+  //   element: <ManagerBranch />,
+  // },
   {
     path: '/manage-food',
     element: <ManagerFood />,
@@ -48,6 +49,10 @@ const routes = [
   {
     path: '/manage-voucher',
     element: <VoucherManager />,
+  },
+  {
+    path: '/manage-tin-tuc',
+    element: <ManagePost />,
   },
 ];
 

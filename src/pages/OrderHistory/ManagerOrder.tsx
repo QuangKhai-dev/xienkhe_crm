@@ -9,55 +9,330 @@ import IconMenuCalendar from '../../components/Icon/Menu/IconMenuCalendar';
 import { Dialog, Transition } from '@headlessui/react';
 import IconX from '../../components/Icon/IconX';
 import * as Yup from 'yup';
-import ImageUploading, { ImageListType } from 'react-images-uploading';
-import { foodServ } from '../../services/foodServ';
+import { ImageListType } from 'react-images-uploading';
 import { managerOrderServ } from '../../services/managerOrderServ';
 import moment from 'moment';
 import Select from 'react-select';
+import Flatpickr from 'react-flatpickr';
+import 'flatpickr/dist/flatpickr.css';
+import Swal from 'sweetalert2';
 type Props = {};
-
+let times = [
+  {
+    value: 1,
+    label: '11:00',
+  },
+  {
+    value: 2,
+    label: '11:15',
+  },
+  {
+    value: 3,
+    label: '11:30',
+  },
+  {
+    value: 4,
+    label: '11:45',
+  },
+  {
+    value: 5,
+    label: '12:00',
+  },
+  {
+    value: 6,
+    label: '12:15',
+  },
+  {
+    value: 7,
+    label: '12:30',
+  },
+  {
+    value: 8,
+    label: '12:45',
+  },
+  {
+    value: 9,
+    label: '13:00',
+  },
+  {
+    value: 10,
+    label: '13:15',
+  },
+  {
+    value: 11,
+    label: '13:30',
+  },
+  {
+    value: 12,
+    label: '13:45',
+  },
+  {
+    value: 14,
+    label: '14:00',
+  },
+  {
+    value: 15,
+    label: '14:15',
+  },
+  {
+    value: 16,
+    label: '14:30',
+  },
+  {
+    value: 17,
+    label: '14:45',
+  },
+  {
+    value: 18,
+    label: '15:00',
+  },
+  {
+    value: 19,
+    label: '15:15',
+  },
+  {
+    value: 20,
+    label: '15:30',
+  },
+  {
+    value: 21,
+    label: '14:45',
+  },
+  {
+    value: 22,
+    label: '15:00',
+  },
+  {
+    value: 23,
+    label: '15:15',
+  },
+  {
+    value: 24,
+    label: '15:30',
+  },
+  {
+    value: 25,
+    label: '15:45',
+  },
+  {
+    value: 26,
+    label: '16:00',
+  },
+  {
+    value: 27,
+    label: '16:15',
+  },
+  {
+    value: 28,
+    label: '16:30',
+  },
+  {
+    value: 29,
+    label: '16:45',
+  },
+  {
+    value: 30,
+    label: '17:00',
+  },
+  {
+    value: 31,
+    label: '17:15',
+  },
+  {
+    value: 32,
+    label: '17:30',
+  },
+  {
+    value: 33,
+    label: '16:45',
+  },
+  {
+    value: 34,
+    label: '17:00',
+  },
+  {
+    value: 35,
+    label: '17:15',
+  },
+  {
+    value: 36,
+    label: '17:30',
+  },
+  {
+    value: 37,
+    label: '17:45',
+  },
+  {
+    value: 38,
+    label: '18:00',
+  },
+  {
+    value: 39,
+    label: '18:15',
+  },
+  {
+    value: 40,
+    label: '18:30',
+  },
+  {
+    value: 41,
+    label: '18:45',
+  },
+  {
+    value: 42,
+    label: '19:00',
+  },
+  {
+    value: 43,
+    label: '19:15',
+  },
+  {
+    value: 44,
+    label: '19:30',
+  },
+  {
+    value: 45,
+    label: '19:45',
+  },
+  {
+    value: 46,
+    label: '20:00',
+  },
+  {
+    value: 47,
+    label: '20:15',
+  },
+  {
+    value: 48,
+    label: '20:30',
+  },
+  {
+    value: 49,
+    label: '20:45',
+  },
+  {
+    value: 50,
+    label: '21:00',
+  },
+  {
+    value: 51,
+    label: '21:15',
+  },
+  {
+    value: 52,
+    label: '21:30',
+  },
+  {
+    value: 53,
+    label: '21:45',
+  },
+  {
+    value: 54,
+    label: '22:00',
+  },
+];
 const ManagerOrder = (props: Props) => {
   const dispatch = useDispatch();
   const maxNumber = 69;
   const [addContactModal, setAddContactModal] = useState<any>(false);
   const [images, setImages] = useState<any>([]);
   const [search, setSearch] = useState<any>('');
+  const [contactList, setContactList] = useState<any>([]);
   const [filteredItems, setFilteredItems] = useState<any>([]);
-  const optionBranch: Array<{ value: number; label: string }> = [];
-  const { values, handleSubmit, handleBlur, handleChange, errors, touched } =
-    useFormik({
-      initialValues: {
-        name: '',
-        giaTien: '',
-        moTa: '',
-      },
-      onSubmit: async (values) => {
-        // const formData = new FormData();
-        // for (let key in values) {
-        //   let value = values[key as keyof FormType];
-        //   formData.append(key, value);
-        // }
-        // // tạo form data gửi hình
-        // // error when set form data is empty
-        // formData.append('img', images[0].file);
-        // foodServ.addFoodServ(formData).then((res) => {
-        //   foodServ.getAllFood();
-        // });
-        // await branchServ.uploadImageBranch(formData, res.data.response.id);
-        // await branchServ.getAllBranch();
-      },
-      validationSchema: Yup.object().shape({
-        name: Yup.string().required('Vui lòng không bỏ trống'),
-        giaTien: Yup.string().required('Vui lòng không bỏ trống'),
-        moTa: Yup.string().required('Vui lòng không bỏ trống'),
-      }),
-    });
+  const [optionBranch, setOptionBranch] = useState<any>([]);
+  const {
+    values,
+    handleSubmit,
+    handleBlur,
+    handleChange,
+    errors,
+    touched,
+    setFieldValue,
+    setValues,
+  } = useFormik({
+    initialValues: {
+      id: '',
+      name: '',
+      email: '',
+      phoneNumber: '',
+      amount: '',
+      requestUser: '',
+      setTime: '',
+      setDay: moment().format('YYYY-MM-DD'),
+      branchId: 1,
+    },
+    onSubmit: async (values, { resetForm }) => {
+      console.log(values);
+      if (values.id) {
+        managerOrderServ
+          .updateManagerOrderServ(values)
+          .then((res) => {
+            managerOrderServ
+              .getAllManagerOrder()
+              .then((res) => {
+                setContactList(res.data.response);
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+            Swal.fire({
+              icon: 'success',
+              title: 'Cập nhật đặt bàn thành công',
+              padding: '2em',
+              customClass: 'sweet-alerts',
+            });
+            setAddContactModal(false);
+            resetForm();
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      } else {
+        managerOrderServ
+          .addOrderTable(values)
+          .then((res) => {
+            setAddContactModal(false);
+            managerOrderServ
+              .getAllManagerOrder()
+              .then((res) => {
+                setContactList(res.data.response);
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+            Swal.fire({
+              icon: 'success',
+              title: 'Thêm đặt bàn thành công',
+              padding: '2em',
+              customClass: 'sweet-alerts',
+            });
+            setAddContactModal(false);
+            resetForm();
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }
+    },
+    validationSchema: Yup.object().shape({
+      name: Yup.string().required('Vui lòng nhập tên khách hàng'),
+      email: Yup.string()
+        .email('Vui lòng nhập đúng định dạng email')
+        .required('Vui lòng nhập email'),
+      phoneNumber: Yup.string()
+        .required('Vui lòng nhập số điện thoại')
+        .matches(/^[0-9]+$/, 'Vui lòng nhập số'),
+      amount: Yup.string()
+        .required('Vui lòng nhập số lượng')
+        .matches(/^[0-9]+$/, 'Vui lòng nhập số'),
+    }),
+  });
   useEffect(() => {
     dispatch(setPageTitle('Manage Order'));
     managerOrderServ
       .getAllManagerOrder()
       .then((res) => {
-        setFilteredItems(res.data.response);
+        setContactList(res.data.response);
       })
       .catch((err) => {
         console.log(err);
@@ -67,16 +342,51 @@ const ManagerOrder = (props: Props) => {
 
   const getAllBranch = () => {
     branchServ.getAllBranch().then((res) => {
-      res.data.response.map((branch: any) => {
-        optionBranch.push({
-          value: branch.id,
-          label: branch.name,
-        });
+      let data = res.data.response.map((item: any) => {
+        return {
+          value: item.id,
+          label: item.name,
+        };
       });
+      setOptionBranch(data);
     });
   };
 
-  const editOrder = (user: any = null) => {
+  useEffect(() => {
+    setFilteredItems(() => {
+      return contactList.filter((item: any) => {
+        return item.user.name?.toLowerCase().includes(search.toLowerCase());
+      });
+    });
+  }, [search, contactList]);
+
+  const editOrder = (order: any = null) => {
+    console.log(order);
+    if (order) {
+      setValues({
+        id: order.id,
+        name: order.user.name,
+        email: order.user.email,
+        phoneNumber: order.user.phoneNumber,
+        amount: order.amount,
+        requestUser: order.requestUser,
+        setTime: order.setTime,
+        setDay: moment(order.setDate).format('YYYY-MM-DD'),
+        branchId: order.branch.id,
+      });
+    } else {
+      setValues({
+        id: '',
+        name: '',
+        email: '',
+        phoneNumber: '',
+        amount: '',
+        requestUser: '',
+        setTime: '',
+        setDay: moment().format('YYYY-MM-DD'),
+        branchId: 1,
+      });
+    }
     setAddContactModal(true);
   };
   const onChangeImage = (
@@ -95,11 +405,11 @@ const ManagerOrder = (props: Props) => {
           </Link>
         </li>
         <li className="before:content-['/'] ltr:before:mr-2 rtl:before:ml-2">
-          <span>Danh sách nhà hàng</span>
+          <span>Danh sách Đặt bàn</span>
         </li>
       </ul>
       <div className="flex items-center justify-between flex-wrap gap-4">
-        <h2 className="text-xl">Danh sách chi nhánh</h2>
+        <h2 className="text-xl">Danh sách Đặt bàn</h2>
         <div className="flex sm:flex-row flex-col sm:items-center sm:gap-3 gap-4 w-full sm:w-auto">
           <div className="flex gap-3">
             <div>
@@ -162,8 +472,7 @@ const ManagerOrder = (props: Props) => {
                     </td>
                     <td className="whitespace-nowrap">
                       <span className="badge badge-outline-danger">
-                        {moment(order.setDate).format('DD/MM')} -
-                        {moment(order.setDate).format('HH:mm')}
+                        {moment(order.setDate).format('DD/MM')} -{order.setTime}
                         {/* {moment().format()} : {moment().format()} */}
                       </span>
                     </td>
@@ -180,7 +489,7 @@ const ManagerOrder = (props: Props) => {
                         <button
                           type="button"
                           className="btn btn-sm btn-outline-primary"
-                          onClick={() => editOrder()}
+                          onClick={() => editOrder(order)}
                         >
                           Edit
                         </button>
@@ -263,101 +572,138 @@ const ManagerOrder = (props: Props) => {
                         ) : null}
                       </div>
                       <div className="mb-5">
-                        <label htmlFor="role">Chức vụ</label>
+                        <label htmlFor="branchId">Chi nhánh</label>
                         <Select
-                          name="role"
-                          id="role"
+                          name="branchId"
+                          id="branchId"
                           defaultValue={optionBranch[0]}
                           options={optionBranch}
                           isSearchable={false}
                           onBlur={handleBlur}
+                          onChange={(type) => {
+                            console.log(type);
+                            setFieldValue('branchId', type?.value);
+                          }}
                         />
                       </div>
 
                       <div className="mb-5">
-                        <label htmlFor="moTa">Mô tả</label>
+                        <label htmlFor="email">Email</label>
                         <input
-                          id="moTa"
+                          id="email"
                           type="text"
-                          name="moTa"
+                          name="email"
                           placeholder="Vui lòng nhập mô tả"
                           className="form-input"
-                          value={values.moTa}
+                          value={values.email}
                           onChange={handleChange}
                           onBlur={handleBlur}
                         />
-                        {errors.moTa && touched.moTa ? (
+                        {errors.email && touched.email ? (
                           <div className="text-danger text-xs mt-1">
-                            {errors.moTa}
+                            {errors.email}
                           </div>
                         ) : null}
                       </div>
                       <div className="mb-5">
-                        <div
-                          className="custom-file-container"
-                          data-upload-id="myFirstImage"
-                        >
-                          <div className="label-container">
-                            <button
-                              type="button"
-                              className="custom-file-container__image-clear"
-                              title="Clear Image"
-                              onClick={() => {
-                                setImages([]);
-                              }}
-                            >
-                              ×
-                            </button>
+                        <label htmlFor="phoneNumber">Số điện thoại</label>
+                        <input
+                          id="phoneNumber"
+                          type="text"
+                          name="phoneNumber"
+                          placeholder="Vui lòng nhập mô tả"
+                          className="form-input"
+                          value={values.phoneNumber}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                        />
+                        {errors.phoneNumber && touched.phoneNumber ? (
+                          <div className="text-danger text-xs mt-1">
+                            {errors.phoneNumber}
                           </div>
-                          <label className="custom-file-container__custom-file"></label>
-                          <input
-                            type="file"
-                            className="custom-file-container__custom-file__custom-file-input"
-                            accept="image/*"
-                          />
-                          <input
-                            type="hidden"
-                            name="MAX_FILE_SIZE"
-                            value="10485760"
-                          />
-                          <ImageUploading
-                            value={images}
-                            onChange={onChangeImage}
-                            maxNumber={maxNumber}
-                          >
-                            {({
-                              imageList,
-                              onImageUpload,
-                              onImageRemoveAll,
-                              onImageUpdate,
-                              onImageRemove,
-                              isDragging,
-                              dragProps,
-                            }) => (
-                              <div className="upload__image-wrapper">
-                                <button
-                                  className="custom-file-container__custom-file__custom-file-control"
-                                  onClick={onImageUpload}
-                                >
-                                  Choose File...
-                                </button>
-                                &nbsp;
-                                {imageList.map((image, index) => (
-                                  <div
-                                    key={index}
-                                    className="custom-file-container__image-preview relative"
-                                  >
-                                    <img
-                                      src={image.dataURL}
-                                      alt="img"
-                                      className="m-auto"
-                                    />
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </ImageUploading>
-                        </div>
+                        ) : null}
+                      </div>
+                      <div className="mb-5">
+                        <label htmlFor="amount">Số lượng</label>
+                        <input
+                          id="amount"
+                          type="text"
+                          name="amount"
+                          placeholder="Vui lòng nhập mô tả"
+                          className="form-input"
+                          value={values.amount}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                        />
+                        {errors.amount && touched.amount ? (
+                          <div className="text-danger text-xs mt-1">
+                            {errors.amount}
+                          </div>
+                        ) : null}
+                      </div>
+                      <div className="mb-5">
+                        <label htmlFor="setDay">Chọn ngày</label>
+                        <Flatpickr
+                          options={{
+                            dateFormat: 'Y-m-d',
+                            position: 'auto left',
+                          }}
+                          className="form-input"
+                          onChange={(date) => {
+                            setFieldValue('setDay', date);
+                          }}
+                          value={values.setDay}
+                        />
+                        {errors.setDay && touched.setDay ? (
+                          <div className="text-danger text-xs mt-1">
+                            {errors.setDay}
+                          </div>
+                        ) : null}
+                      </div>
+                      <div className="mb-5">
+                        <label htmlFor="setTime">Chọn giờ</label>
+                        <Select
+                          name="setTime"
+                          id="setTime"
+                          // defaultValue={times[0].label}
+                          options={times}
+                          isSearchable={false}
+                          onBlur={handleBlur}
+                          // onChange={(selectedOption) => {
+                          //   setFieldValue('setTime', selectedOption);
+                          // }}
+                          // value={values.setTime}
+                          onChange={(type) => {
+                            console.log(type);
+                            setFieldValue('setTime', type!.label);
+                          }}
+                          value={times.find((time) => {
+                            return time.label === values.setTime;
+                          })}
+                        />
+                        {errors.setTime && touched.setTime ? (
+                          <div className="text-danger text-xs mt-1">
+                            {errors.setTime}
+                          </div>
+                        ) : null}
+                      </div>
+                      <div className="mb-5">
+                        <label htmlFor="requestUser">Yêu cầu khách</label>
+                        <input
+                          id="requestUser"
+                          type="text"
+                          name="requestUser"
+                          placeholder="Vui lòng nhập mô tả"
+                          className="form-input"
+                          value={values.requestUser}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                        />
+                        {errors.requestUser && touched.requestUser ? (
+                          <div className="text-danger text-xs mt-1">
+                            {errors.requestUser}
+                          </div>
+                        ) : null}
                       </div>
 
                       <div className="flex justify-end items-center mt-8">
@@ -373,7 +719,7 @@ const ManagerOrder = (props: Props) => {
                           className="btn btn-primary ltr:ml-4 rtl:mr-4"
                           // onClick={editOrder}
                         >
-                          Add
+                          {values.id ? 'Cập nhật' : 'Thêm'}
                         </button>
                       </div>
                     </form>
